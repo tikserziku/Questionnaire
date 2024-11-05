@@ -266,6 +266,125 @@ footer a {
 footer a:hover {
     color: var(--primary-color);
 }
+/* Стили для страницы политики конфиденциальности */
+.privacy-policy-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: var(--bg-dark);
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+}
+
+.breadcrumbs {
+    margin-bottom: 2rem;
+    color: #ccc;
+}
+
+.breadcrumbs a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.breadcrumbs a:hover {
+    text-decoration: underline;
+}
+
+.privacy-content {
+    line-height: 1.6;
+}
+
+.privacy-content h1 {
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.policy-section {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    transition: transform 0.3s ease;
+    animation: fadeIn 0.5s ease-out forwards;
+    animation-delay: calc(var(--section-index) * 0.1s);
+}
+
+.policy-section:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.policy-section h2 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.policy-section ul {
+    list-style-type: none;
+    padding-left: 1.5rem;
+}
+
+.policy-section ul li {
+    margin: 0.5rem 0;
+    position: relative;
+}
+
+.policy-section ul li:before {
+    content: "•";
+    color: var(--primary-color);
+    position: absolute;
+    left: -1.5rem;
+}
+
+.contact-info {
+    background: rgba(76, 175, 80, 0.1);
+    padding: 1rem;
+    border-radius: 5px;
+    margin-top: 1rem;
+}
+
+.last-update {
+    text-align: right;
+    font-style: italic;
+    color: #ccc;
+    font-size: 0.9rem;
+}
+
+/* Print styles */
+@media print {
+    .privacy-policy-container {
+        background: none;
+        color: #000;
+    }
+
+    .policy-section {
+        break-inside: avoid;
+        background: none;
+    }
+
+    .breadcrumbs {
+        display: none;
+    }
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .privacy-policy-container {
+        padding: 1rem;
+        margin: 1rem;
+    }
+
+    .privacy-content h1 {
+        font-size: 2rem;
+    }
+
+    .policy-section {
+        padding: 1rem;
+    }
+}
+
 
 /* Адаптивность */
 @media (max-width: 768px) {
