@@ -71,148 +71,19 @@
         </section>
 
         <section class="policy-section last-update">
-            <p>Последнее обновление: {% now "d.m.Y" %}</p>
+            <p>Последнее обновление: {{ year }}</p>
         </section>
     </article>
 </div>
-
-<style>
-.privacy-policy-container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 2rem;
-    background: rgba(0, 0, 0, 0.6);
-    border-radius: 15px;
-    backdrop-filter: blur(10px);
-}
-
-.breadcrumbs {
-    margin-bottom: 2rem;
-    color: #ccc;
-}
-
-.breadcrumbs a {
-    color: #4CAF50;
-    text-decoration: none;
-}
-
-.breadcrumbs a:hover {
-    text-decoration: underline;
-}
-
-.privacy-content {
-    line-height: 1.6;
-}
-
-.privacy-content h1 {
-    font-size: 2.5rem;
-    margin-bottom: 2rem;
-    color: #ffffff;
-    text-align: center;
-}
-
-.policy-section {
-    margin: 2rem 0;
-    padding: 1.5rem;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 10px;
-    transition: transform 0.3s ease;
-}
-
-.policy-section:hover {
-    transform: translateY(-2px);
-    background: rgba(255, 255, 255, 0.08);
-}
-
-.policy-section h2 {
-    color: #4CAF50;
-    margin-bottom: 1rem;
-    font-size: 1.5rem;
-}
-
-.policy-section ul {
-    list-style-type: none;
-    padding-left: 1.5rem;
-}
-
-.policy-section ul li {
-    margin: 0.5rem 0;
-    position: relative;
-}
-
-.policy-section ul li:before {
-    content: "•";
-    color: #4CAF50;
-    position: absolute;
-    left: -1.5rem;
-}
-
-.contact-info {
-    background: rgba(76, 175, 80, 0.1);
-    padding: 1rem;
-    border-radius: 5px;
-    margin-top: 1rem;
-}
-
-.last-update {
-    text-align: right;
-    font-style: italic;
-    color: #ccc;
-    font-size: 0.9rem;
-}
-
-@media (max-width: 768px) {
-    .privacy-policy-container {
-        padding: 1rem;
-        margin: 1rem;
-    }
-
-    .privacy-content h1 {
-        font-size: 2rem;
-    }
-
-    .policy-section {
-        padding: 1rem;
-    }
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.policy-section {
-    animation: fadeIn 0.5s ease-out forwards;
-    animation-delay: calc(var(--section-index) * 0.1s);
-}
-
-/* Print styles */
-@media print {
-    .privacy-policy-container {
-        background: none;
-        color: #000;
-    }
-
-    .policy-section {
-        break-inside: avoid;
-        background: none;
-    }
-
-    .breadcrumbs {
-        display: none;
-    }
-}
-</style>
+{% endblock %}
 
 {% block extra_scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    // Add animation delays to sections
     const sections = document.querySelectorAll('.policy-section');
     sections.forEach((section, index) => {
         section.style.setProperty('--section-index', index);
     });
 });
 </script>
-{% endblock %}
 {% endblock %}
