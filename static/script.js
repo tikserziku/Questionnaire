@@ -214,6 +214,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Добавьте после обработчиков модальных окон
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        toggleVoiceModal(false);
+        toggleChatModal(false);
+    }
+});
+    
     // Валидация формы
     const form = document.getElementById('survey-form');
     if (form) {
