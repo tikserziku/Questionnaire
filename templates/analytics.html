@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Аналитика ответов | AI Survey{% endblock %}
+
+{% block content %}
+<div class="analytics-container">
+    <h1>Аналитика ответов</h1>
+
+    <div class="stats-grid">
+        <!-- Общая статистика -->
+        <div class="stats-card">
+            <h2>Общая статистика</h2>
+            <div class="stats-content">
+                {% for level, count, first, last in overall_stats %}
+                <div class="stat-item">
+                    <h3>{{ 'Начинающие' if level == 'beginner' else 'Продвинутые' }}</h3>
+                    <p>Количество: {{ count }}</p>
+                    <p>Первый ответ: {{ first.strftime('%d.%m.%Y') }}</p>
+                    <p>Последний ответ: {{ last.strftime('%d.%m.%Y') }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Популярные темы -->
+        <div class="stats-card">
+            <h2>Популярные темы</h2>
+            <div class="topics-chart">
+                {% for topic, count in topic_stats.items() %}
+                <div class="topic-bar">
+                    <div class="bar" style="width: {{ (count / topic_stats.values()|max * 100)|round }}%">
+                        {{ count }}
+                    </div>
+                    <span class="topic-name">{{ topic }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Опыт участников -->
+        <div class="stats-card">
+            <h2>Опыт участников</h2>
+            <div class="experience-list">
+                {% for level, exp, prog_exp, ai_exp in experience_data %}
+                <div class="experience-item">
+                    <h4>{{ 'Начинающий' if level == 'beginner' else 'Продвинутый' }}</h4>
+                    {% if level == 'beginner' %}
+                        {% if prog_exp %}
+                            <p>Опыт программирования: {{ prog_exp|truncate(100) }}</p>
+                        {% endif %}
+                    {% else %}
+                        {% if ai_exp %}
+                            <p>Опыт работы с ИИ: {{ ai_exp|truncate(100) }}</p>
+                        {% endif %}
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
