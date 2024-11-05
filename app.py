@@ -8,6 +8,7 @@ import openai
 import psycopg2
 from datetime import datetime
 from whitenoise import WhiteNoise
+from datetime import datetime
 
 # Настройка логирования
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
@@ -66,6 +67,9 @@ def get_db_connection():
     except Exception as e:
         logger.error(f"Database connection error: {e}")
         return None
+@app.context_processor
+def utility_processor():
+    return {'year': datetime.now().year}
 
 @app.route('/')
 def index():
