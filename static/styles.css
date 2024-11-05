@@ -36,6 +36,136 @@ h1 {
     text-align: center;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
+/* Стили для чата */
+#chatgpt-chat {
+    height: 300px;
+    overflow-y: auto;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* Общие стили для сообщений */
+.user-message,
+.bot-message {
+    max-width: 85%;
+    padding: 12px 16px;
+    border-radius: 12px;
+    margin: 4px 0;
+    word-wrap: break-word;
+}
+
+/* Стили для сообщений пользователя */
+.user-message {
+    background: rgba(76, 175, 80, 0.2);
+    border-top-right-radius: 2px;
+    margin-left: auto;
+    text-align: right;
+    color: #E0E0E0;
+    position: relative;
+}
+
+.user-message::after {
+    content: '';
+    position: absolute;
+    right: -8px;
+    top: 0;
+    border: 8px solid transparent;
+    border-top-color: rgba(76, 175, 80, 0.2);
+}
+
+/* Стили для сообщений бота */
+.bot-message {
+    background: rgba(33, 150, 243, 0.2);
+    border-top-left-radius: 2px;
+    margin-right: auto;
+    text-align: left;
+    color: #FFFFFF;
+    position: relative;
+}
+
+.bot-message::after {
+    content: '';
+    position: absolute;
+    left: -8px;
+    top: 0;
+    border: 8px solid transparent;
+    border-top-color: rgba(33, 150, 243, 0.2);
+}
+
+/* Добавляем метки для сообщений */
+.user-message::before,
+.bot-message::before {
+    content: '';
+    position: absolute;
+    top: -20px;
+    font-size: 0.8rem;
+    color: #888;
+}
+
+.user-message::before {
+    content: 'Вы';
+    right: 0;
+}
+
+.bot-message::before {
+    content: 'ChatGPT';
+    left: 0;
+}
+
+/* Разделитель между сообщениями */
+.message-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 8px 0;
+}
+
+/* Стили для окна чата */
+.chat-input-container {
+    display: flex;
+    gap: 8px;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+}
+
+.chat-input {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    color: #FFFFFF;
+    font-size: 14px;
+}
+
+.chat-input:focus {
+    outline: none;
+    border-color: rgba(76, 175, 80, 0.5);
+}
+
+/* Стилизация скроллбара */
+#chatgpt-chat::-webkit-scrollbar {
+    width: 6px;
+}
+
+#chatgpt-chat::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+#chatgpt-chat::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+#chatgpt-chat::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
 /* Стили для страницы аналитики */
 .analytics-container {
     max-width: 1200px;
