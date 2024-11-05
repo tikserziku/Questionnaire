@@ -33,7 +33,9 @@
         <div class="spinner"></div>
         <span>Загрузка...</span>
     </div>
-
+<nav class="main-nav">
+    <a href="{{ url_for('analytics') }}" class="nav-link">Просмотр ответов</a>
+</nav>
     <script src="/static/script.js" defer></script>
     {% block extra_scripts %}{% endblock %}
 </body>
