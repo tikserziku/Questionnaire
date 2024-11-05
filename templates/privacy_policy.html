@@ -1,6 +1,218 @@
 {% extends 'base.html' %}
 
+{% block title %}Политика конфиденциальности | AI Survey{% endblock %}
+
 {% block content %}
-<h1>Политика конфиденциальности</h1>
-<p>Мы уважаем вашу конфиденциальность и обязуемся защищать вашу личную информацию. Все данные, которые вы предоставляете, используются исключительно для улучшения нашего курса и не передаются третьим лицам.</p>
+<div class="privacy-policy-container">
+    <nav class="breadcrumbs">
+        <a href="/">Главная</a> / <span>Политика конфиденциальности</span>
+    </nav>
+
+    <article class="privacy-content">
+        <h1>Политика конфиденциальности</h1>
+        
+        <section class="policy-section">
+            <h2>1. Общие положения</h2>
+            <p>Мы уважаем вашу конфиденциальность и обязуемся защищать вашу личную информацию. Эта политика конфиденциальности описывает, как мы собираем, используем и защищаем ваши данные.</p>
+        </section>
+
+        <section class="policy-section">
+            <h2>2. Сбор информации</h2>
+            <p>Мы собираем следующие типы информации:</p>
+            <ul>
+                <li>Ответы на вопросы анкеты</li>
+                <li>Уровень знаний в области ИИ</li>
+                <li>Предпочтения в обучении</li>
+                <li>Записи голосовых вопросов</li>
+                <li>История взаимодействия с ChatGPT</li>
+            </ul>
+        </section>
+
+        <section class="policy-section">
+            <h2>3. Использование данных</h2>
+            <p>Собранные данные используются исключительно для:</p>
+            <ul>
+                <li>Улучшения качества нашего курса</li>
+                <li>Персонализации учебного материала</li>
+                <li>Анализа эффективности обучения</li>
+                <li>Технической поддержки</li>
+            </ul>
+        </section>
+
+        <section class="policy-section">
+            <h2>4. Защита данных</h2>
+            <p>Мы применяем современные меры безопасности для защиты ваших данных:</p>
+            <ul>
+                <li>Шифрование данных при передаче</li>
+                <li>Безопасное хранение в зашифрованном виде</li>
+                <li>Регулярное обновление систем безопасности</li>
+                <li>Ограниченный доступ к данным</li>
+            </ul>
+        </section>
+
+        <section class="policy-section">
+            <h2>5. Ваши права</h2>
+            <p>Вы имеете право:</p>
+            <ul>
+                <li>Получить копию ваших данных</li>
+                <li>Исправить неточные данные</li>
+                <li>Удалить ваши данные</li>
+                <li>Ограничить обработку данных</li>
+            </ul>
+        </section>
+
+        <section class="policy-section">
+            <h2>6. Контакты</h2>
+            <p>По вопросам, связанным с обработкой ваших данных, обращайтесь:</p>
+            <div class="contact-info">
+                <p>Email: privacy@aisurvey.com</p>
+                <p>Телефон: +7 (XXX) XXX-XX-XX</p>
+            </div>
+        </section>
+
+        <section class="policy-section last-update">
+            <p>Последнее обновление: {% now "d.m.Y" %}</p>
+        </section>
+    </article>
+</div>
+
+<style>
+.privacy-policy-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+}
+
+.breadcrumbs {
+    margin-bottom: 2rem;
+    color: #ccc;
+}
+
+.breadcrumbs a {
+    color: #4CAF50;
+    text-decoration: none;
+}
+
+.breadcrumbs a:hover {
+    text-decoration: underline;
+}
+
+.privacy-content {
+    line-height: 1.6;
+}
+
+.privacy-content h1 {
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+    color: #ffffff;
+    text-align: center;
+}
+
+.policy-section {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    transition: transform 0.3s ease;
+}
+
+.policy-section:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.policy-section h2 {
+    color: #4CAF50;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.policy-section ul {
+    list-style-type: none;
+    padding-left: 1.5rem;
+}
+
+.policy-section ul li {
+    margin: 0.5rem 0;
+    position: relative;
+}
+
+.policy-section ul li:before {
+    content: "•";
+    color: #4CAF50;
+    position: absolute;
+    left: -1.5rem;
+}
+
+.contact-info {
+    background: rgba(76, 175, 80, 0.1);
+    padding: 1rem;
+    border-radius: 5px;
+    margin-top: 1rem;
+}
+
+.last-update {
+    text-align: right;
+    font-style: italic;
+    color: #ccc;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+    .privacy-policy-container {
+        padding: 1rem;
+        margin: 1rem;
+    }
+
+    .privacy-content h1 {
+        font-size: 2rem;
+    }
+
+    .policy-section {
+        padding: 1rem;
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.policy-section {
+    animation: fadeIn 0.5s ease-out forwards;
+    animation-delay: calc(var(--section-index) * 0.1s);
+}
+
+/* Print styles */
+@media print {
+    .privacy-policy-container {
+        background: none;
+        color: #000;
+    }
+
+    .policy-section {
+        break-inside: avoid;
+        background: none;
+    }
+
+    .breadcrumbs {
+        display: none;
+    }
+}
+</style>
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Add animation delays to sections
+    const sections = document.querySelectorAll('.policy-section');
+    sections.forEach((section, index) => {
+        section.style.setProperty('--section-index', index);
+    });
+});
+</script>
+{% endblock %}
 {% endblock %}
