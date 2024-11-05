@@ -3,7 +3,7 @@ import sys
 import logging
 import json
 import random
-from flask import Flask, render_template, request, redirect, jsonify, flash
+from flask import Flask, render_template, request, redirect, jsonify, flash, url_for
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 import openai
@@ -12,7 +12,11 @@ from datetime import datetime
 from whitenoise import WhiteNoise
 
 # Настройка логирования
-logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+logging.basicConfig(
+    stream=sys.stdout,
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
@@ -136,6 +140,8 @@ if missing_vars:
 
 # Настройка OpenAI
 openai.api_key = os.getenv('OPENAI_API_KEY')
+if not openai.api_key:
+    logger.warning("OpenAI API key not found")
 
 # Настройка лимитера
 limiter = Limiter(
@@ -153,7 +159,8 @@ def get_db_connection():
             user='postgres',
             password=os.environ['STACKHERO_POSTGRESQL_ADMIN_PASSWORD'],
             host=os.environ['STACKHERO_POSTGRESQL_HOST'],
-            port=os.environ['STACKHERO_POSTGRESQL_PORT']
+            port=os.environ['STACKHERO_POSTGRESQL_PORT'],
+            connect_timeout=5
         )
         return conn
     except Exception as e:
@@ -170,13 +177,20 @@ def utility_processor():
         'get_random_background': get_random_background
     }
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
     """Main page route"""
     try:
+        if request.method == 'POST':
+            level = request.form.get('level')
+            if level in ['beginner', 'advanced']:
+                return redirect(url_for('questions', level=level))
+            else:
+                flash('Пожалуйста, выберите уровень', 'error')
+                return redirect(url_for('index'))
         return render_template('index.html')
     except Exception as e:
-        logger.error(f"Error rendering index page: {e}")
+        logger.error(f"Error on index page: {e}")
         return "Internal Server Error", 500
 
 @app.route('/questions/<level>', methods=['GET', 'POST'])
@@ -184,7 +198,7 @@ def questions(level):
     """Survey questions route"""
     if level not in ['beginner', 'advanced']:
         flash('Неверный уровень', 'error')
-        return redirect('/')
+        return redirect(url_for('index'))
 
     if request.method == 'POST':
         try:
@@ -193,7 +207,6 @@ def questions(level):
             form_data['timestamp'] = datetime.utcnow().isoformat()
             form_data['ip_address'] = request.remote_addr
             
-            # Проверка обязательных полей
             questions = SURVEY_QUESTIONS[level]
             required_fields = [q['id'] for q in questions if q.get('required')]
             
@@ -205,12 +218,12 @@ def questions(level):
                                     questions=questions)
 
             save_to_db(form_data)
-            return redirect('/thank_you')
+            return redirect(url_for('thank_you'))
             
         except Exception as e:
             logger.error(f"Error processing form: {e}")
             flash("Произошла ошибка при сохранении данных. Попробуйте еще раз.", "error")
-            return redirect('/questions/' + level)
+            return redirect(url_for('questions', level=level))
 
     return render_template(
         'questions.html',
@@ -222,6 +235,9 @@ def questions(level):
 @limiter.limit("5 per minute")
 def chatgpt():
     """ChatGPT API endpoint"""
+    if not openai.api_key:
+        return jsonify({'error': 'OpenAI API not configured'}), 503
+
     try:
         message = request.json.get('message', '')
         if not message:
@@ -246,6 +262,9 @@ def chatgpt():
 @limiter.limit("5 per minute")
 def process_voice():
     """Voice processing endpoint"""
+    if not openai.api_key:
+        return jsonify({'error': 'OpenAI API not configured'}), 503
+
     try:
         voice_input = request.json.get('voice_input', '')
         if not voice_input:
@@ -330,6 +349,11 @@ def internal_error(error):
     """500 error handler"""
     logger.error(f"Internal server error: {error}")
     return render_template('500.html'), 500
+
+@app.errorhandler(429)
+def ratelimit_handler(e):
+    """Rate limit error handler"""
+    return jsonify(error="Слишком много запросов. Пожалуйста, подождите немного."), 429
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
