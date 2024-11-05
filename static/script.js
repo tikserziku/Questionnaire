@@ -130,64 +130,51 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Обработка отправки сообщения ChatGPT
     const handleChatSubmit = async () => {
-        if (isProcessing) return;
+    if (isProcessing) return;
 
-        const message = chatInput.value.trim();
-        if (!message) return;
+    const message = chatInput.value.trim();
+    if (!message) return;
 
-        try {
-            isProcessing = true;
-            loadingIndicator.style.display = 'block';
-            chatInput.value = '';
-            appendMessage(message, true);
+    try {
+        isProcessing = true;
+        loadingIndicator.style.display = 'block';
+        
+        // Очищаем поле ввода ДО отправки запроса
+        chatInput.value = '';
+        
+        appendMessage(message, true);
 
-            const response = await fetch('/chatgpt', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ message })
-            });
+        const response = await fetch('/chatgpt', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ message })
+        });
 
-            if (!response.ok) throw new Error('Network response was not ok');
+        if (!response.ok) throw new Error('Network response was not ok');
 
-            const data = await response.json();
-            appendMessage(data.reply);
+        const data = await response.json();
+        
+        // Добавляем ответ только в чат, НЕ в поле ввода
+        appendMessage(data.reply);
 
-            // Сохраняем диалог
-            const currentDialogs = chatgptQuestionsInput.value;
-            const newDialog = `Q: ${message}\nA: ${data.reply}\n---\n`;
-            chatgptQuestionsInput.value = currentDialogs + newDialog;
+        // Сохраняем диалог
+        const currentDialogs = chatgptQuestionsInput.value;
+        const newDialog = `Q: ${message}\nA: ${data.reply}\n---\n`;
+        chatgptQuestionsInput.value = currentDialogs + newDialog;
 
-            // Если это помощь с формулировкой, предлагаем использовать ответ
-            if (message.toLowerCase().includes('помог') || 
-                message.toLowerCase().includes('сформулир')) {
-                if (confirm('Использовать этот ответ в форме?')) {
-                    // Находим активное или последнее поле ввода
-                    const activeElement = document.activeElement;
-                    let targetInput;
-                    
-                    if (activeElement.tagName === 'TEXTAREA' || activeElement.tagName === 'INPUT') {
-                        targetInput = activeElement;
-                    } else {
-                        const inputs = document.querySelectorAll('textarea, input[type="text"]');
-                        targetInput = inputs[inputs.length - 1];
-                    }
-
-                    if (targetInput) {
-                        targetInput.value = data.reply;
-                    }
-                }
-            }
-
-        } catch (error) {
-            console.error('ChatGPT error:', error);
-            appendMessage('Произошла ошибка. Попробуйте еще раз.', false);
-        } finally {
-            isProcessing = false;
-            loadingIndicator.style.display = 'none';
-        }
-    };
+    } catch (error) {
+        console.error('ChatGPT error:', error);
+        appendMessage('Произошла ошибка. Попробуйте еще раз.', false);
+    } finally {
+        isProcessing = false;
+        loadingIndicator.style.display = 'none';
+        
+        // Фокус на поле ввода для удобства
+        chatInput.focus();
+    }
+};
 
     chatSend.addEventListener('click', handleChatSubmit);
     chatInput.addEventListener('keypress', (e) => {
