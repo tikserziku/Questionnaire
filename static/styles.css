@@ -29,6 +29,94 @@ main {
     padding: 2rem 1rem;
 }
 
+/* Стили для голосового модального окна */
+#voice-modal .modal-content {
+    max-width: 500px;
+}
+
+.voice-content {
+    padding: 20px;
+}
+
+.voice-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+}
+
+.voice-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #666;
+}
+
+.voice-indicator.recording {
+    background: #ff4444;
+    animation: pulse 1s infinite;
+}
+
+.voice-result {
+    display: none; /* Изначально скрыто */
+    margin: 20px 0;
+}
+
+.voice-result.show {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+.voice-original, .voice-processed {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.voice-original h4, .voice-processed h4 {
+    color: var(--primary-color);
+    margin-bottom: 10px;
+}
+
+.voice-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.voice-action-button {
+    padding: 10px 20px;
+    background: var(--primary-color);
+    border: none;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.3s ease;
+}
+
+.voice-action-button:disabled {
+    background: #666;
+    cursor: not-allowed;
+}
+
+.voice-action-button:not(:disabled):hover {
+    transform: translateY(-2px);
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
 /* Общие стили компонентов */
 h1 {
     font-size: 2rem;
