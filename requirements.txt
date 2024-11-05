@@ -5,4 +5,3 @@ matplotlib
 openai
 Flask-Limiter
 psycopg2-binary
-
