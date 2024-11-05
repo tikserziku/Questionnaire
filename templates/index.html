@@ -1,180 +1,25 @@
 {% extends 'base.html' %}
 
-{% block title %}Главная - Курс по искусственному интеллекту{% endblock %}
-
 {% block content %}
-<section class="welcome-section">
-    <div class="container">
-        <h1 class="main-title">Добро пожаловать на курс по искусственному интеллекту!</h1>
-        
-        <div class="course-description">
-            <p class="lead-text">Выберите подходящий для вас уровень обучения и начните путешествие в мир ИИ</p>
-        </div>
-
-        <form method="post" class="level-selection-form">
-            <h2 class="form-title">Выберите ваш уровень знаний:</h2>
-            
-            <div class="level-buttons">
-                <button type="submit" name="level" value="beginner" class="level-button beginner">
-                    <span class="icon">🌱</span>
-                    <span class="button-title">Я начинающий</span>
-                    <span class="button-description">Подходит, если вы только начинаете изучать ИИ</span>
+<div class="welcome-container">
+    <h1>Добро пожаловать на курс по искусственному интеллекту!</h1>
+    
+    <div class="level-selection">
+        <form method="POST" action="{{ url_for('index') }}">
+            <div class="level-cards">
+                <button type="submit" name="level" value="beginner" class="level-card beginner">
+                    <div class="card-icon">🌱</div>
+                    <h2>Я начинающий</h2>
+                    <p>Подходит, если вы только начинаете изучать ИИ</p>
                 </button>
 
-                <button type="submit" name="level" value="advanced" class="level-button advanced">
-                    <span class="icon">⚡</span>
-                    <span class="button-title">Я продвинутый</span>
-                    <span class="button-description">Для тех, кто уже имеет опыт работы с ИИ</span>
+                <button type="submit" name="level" value="advanced" class="level-card advanced">
+                    <div class="card-icon">⚡</div>
+                    <h2>Я продвинутый</h2>
+                    <p>Для тех, кто уже имеет опыт работы с ИИ</p>
                 </button>
             </div>
         </form>
-
-        <div class="features">
-            <div class="feature">
-                <h3>📚 Адаптивная программа</h3>
-                <p>Материалы подстраиваются под ваш уровень знаний</p>
-            </div>
-            <div class="feature">
-                <h3>🤖 Практические задания</h3>
-                <p>Реальные проекты и задачи для закрепления навыков</p>
-            </div>
-            <div class="feature">
-                <h3>👥 Поддержка</h3>
-                <p>Помощь кураторов и общение с сообществом</p>
-            </div>
-        </div>
     </div>
-</section>
-
-<!-- Добавим стили для этой страницы -->
-<style>
-.welcome-section {
-    padding: 40px 20px;
-    text-align: center;
-}
-
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-.main-title {
-    font-size: 2.5rem;
-    margin-bottom: 2rem;
-    color: #ffffff;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-}
-
-.lead-text {
-    font-size: 1.2rem;
-    margin-bottom: 3rem;
-    color: #e0e0e0;
-}
-
-.level-selection-form {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 2rem;
-    background: rgba(0,0,0,0.6);
-    border-radius: 15px;
-    backdrop-filter: blur(10px);
-}
-
-.form-title {
-    font-size: 1.5rem;
-    margin-bottom: 2rem;
-    color: #ffffff;
-}
-
-.level-buttons {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
-    margin: 2rem auto;
-}
-
-.level-button {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 2rem;
-    border: 2px solid rgba(255,255,255,0.1);
-    border-radius: 10px;
-    background: rgba(76, 175, 80, 0.1);
-    transition: all 0.3s ease;
-    cursor: pointer;
-}
-
-.level-button:hover {
-    transform: translateY(-5px);
-    background: rgba(76, 175, 80, 0.2);
-    border-color: rgba(76, 175, 80, 0.5);
-}
-
-.level-button .icon {
-    font-size: 2rem;
-    margin-bottom: 1rem;
-}
-
-.level-button .button-title {
-    font-size: 1.2rem;
-    font-weight: bold;
-    margin-bottom: 0.5rem;
-}
-
-.level-button .button-description {
-    font-size: 0.9rem;
-    color: #e0e0e0;
-}
-
-.features {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 30px;
-    margin-top: 4rem;
-    padding: 2rem;
-}
-
-.feature {
-    padding: 1.5rem;
-    background: rgba(255,255,255,0.1);
-    border-radius: 10px;
-    transition: transform 0.3s ease;
-}
-
-.feature:hover {
-    transform: translateY(-5px);
-}
-
-.feature h3 {
-    margin-bottom: 1rem;
-    color: #4CAF50;
-}
-
-/* Адаптивность */
-@media (max-width: 768px) {
-    .main-title {
-        font-size: 2rem;
-    }
-
-    .level-buttons {
-        grid-template-columns: 1fr;
-    }
-
-    .features {
-        grid-template-columns: 1fr;
-        gap: 20px;
-    }
-}
-
-/* Анимации */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.main-title, .lead-text, .level-selection-form, .features {
-    animation: fadeIn 0.8s ease-out forwards;
-}
-</style>
+</div>
 {% endblock %}
