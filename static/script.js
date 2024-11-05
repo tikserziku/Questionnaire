@@ -1,155 +1,187 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Elements
+    // Элементы интерфейса
     const voiceButton = document.getElementById('voice-button');
     const voiceQuestionInput = document.getElementById('voice_question');
+    const chatButton = document.getElementById('chatgpt-button');
+    const chatModal = document.getElementById('chatgpt-modal');
+    const chatInput = document.getElementById('chatgpt-input');
+    const chatSend = document.getElementById('chatgpt-send');
+    const chatContainer = document.getElementById('chatgpt-chat');
+    const chatgptQuestionsInput = document.getElementById('chatgpt_questions');
     const loadingIndicator = document.getElementById('loading-indicator');
-    const form = document.getElementById('survey-form');
-    
-    // Speech Recognition Setup
-    if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        const recognition = new SpeechRecognition();
+    const closeModalBtn = document.querySelector('.close');
+
+    // Настройка распознавания речи
+    let recognition = null;
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        recognition = new (window.webkitSpeechRecognition || window.SpeechRecognition)();
         recognition.lang = 'ru-RU';
+        recognition.continuous = false;
         recognition.interimResults = false;
 
-        voiceButton.addEventListener('click', () => {
-            recognition.start();
-            voiceButton.disabled = true;
-            voiceButton.textContent = 'Слушаю...';
-        });
-
-        recognition.addEventListener('result', async (event) => {
+        // Обработчик результатов распознавания речи
+        recognition.onresult = async (event) => {
             const transcript = event.results[0][0].transcript;
+            loadingIndicator.style.display = 'block';
+
             try {
-                loadingIndicator.style.display = 'block';
                 const response = await fetch('/process_voice', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({ voice_input: transcript })
                 });
 
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                if (!response.ok) throw new Error('Network response was not ok');
                 
                 const data = await response.json();
-                if (data.error) {
-                    throw new Error(data.error);
+                
+                // Находим ближайшее текстовое поле или textarea
+                const activeElement = document.activeElement;
+                let targetInput;
+                
+                if (activeElement.tagName === 'TEXTAREA' || activeElement.tagName === 'INPUT') {
+                    targetInput = activeElement;
+                } else {
+                    // Если нет активного поля, используем последнее поле в форме
+                    const inputs = document.querySelectorAll('textarea, input[type="text"]');
+                    targetInput = inputs[inputs.length - 1];
                 }
-                
-                voiceQuestionInput.value = data.corrected_question;
-                
+
+                if (targetInput) {
+                    targetInput.value = data.processed_question;
+                    // Сохраняем для анализа
+                    voiceQuestionInput.value = JSON.stringify({
+                        original: transcript,
+                        processed: data.processed_question,
+                        timestamp: new Date().toISOString()
+                    });
+                }
+
             } catch (error) {
                 console.error('Voice processing error:', error);
-                alert('Ошибка при обработке голосового ввода: ' + error.message);
+                alert('Ошибка при обработке голосового ввода. Попробуйте еще раз.');
             } finally {
                 loadingIndicator.style.display = 'none';
                 voiceButton.disabled = false;
-                voiceButton.textContent = '🎤 Голосовой ввод';
+                voiceButton.innerHTML = '🎤 Голосовой ввод';
             }
-        });
+        };
 
-        recognition.addEventListener('error', (event) => {
+        recognition.onerror = (event) => {
             console.error('Speech recognition error:', event.error);
-            alert('Ошибка распознавания речи: ' + event.error);
+            alert('Ошибка распознавания речи. Попробуйте еще раз.');
             voiceButton.disabled = false;
-            voiceButton.textContent = '🎤 Голосовой ввод';
+            voiceButton.innerHTML = '🎤 Голосовой ввод';
+        };
+
+        // Настройка кнопки голосового ввода
+        voiceButton.addEventListener('click', () => {
+            voiceButton.disabled = true;
+            voiceButton.innerHTML = '🎤 Слушаю...';
+            recognition.start();
         });
     } else {
-        voiceButton.disabled = true;
-        voiceButton.textContent = 'Голосовой ввод не поддерживается';
+        voiceButton.style.display = 'none';
+        console.log('Speech recognition not supported');
     }
 
-    // ChatGPT Modal Setup
-    const setupChatGPT = () => {
-        const modal = document.getElementById('chatgpt-modal');
-        const chatBtn = document.getElementById('chatgpt-button');
-        const closeBtn = document.querySelector('.close');
-        const chatInput = document.getElementById('chatgpt-input');
-        const chatSend = document.getElementById('chatgpt-send');
-        const chatContainer = document.getElementById('chatgpt-chat');
-        const chatgptQuestionsInput = document.getElementById('chatgpt_questions');
-
-        let isProcessingChat = false;
-
-        const toggleModal = (show) => {
-            modal.style.display = show ? 'block' : 'none';
-        };
-
-        chatBtn.addEventListener('click', () => toggleModal(true));
-        closeBtn.addEventListener('click', () => toggleModal(false));
-
-        window.addEventListener('click', (event) => {
-            if (event.target === modal) {
-                toggleModal(false);
-            }
-        });
-
-        const appendMessage = (message, className) => {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = className;
-            messageDiv.textContent = message;
-            chatContainer.appendChild(messageDiv);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-        };
-
-        const handleChatSubmit = async () => {
-            if (isProcessingChat) return;
-
-            const message = chatInput.value.trim();
-            if (!message) return;
-
-            try {
-                isProcessingChat = true;
-                loadingIndicator.style.display = 'block';
-                chatInput.value = '';
-                appendMessage(message, 'user-message');
-
-                const response = await fetch('/chatgpt', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
-                    },
-                    body: JSON.stringify({ message })
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const data = await response.json();
-                if (data.error) {
-                    throw new Error(data.error);
-                }
-
-                appendMessage(data.reply, 'bot-message');
-                chatgptQuestionsInput.value += `User: ${message}\nChatGPT: ${data.reply}\n`;
-
-            } catch (error) {
-                console.error('ChatGPT error:', error);
-                alert('Ошибка при обработке запроса: ' + error.message);
-            } finally {
-                isProcessingChat = false;
-                loadingIndicator.style.display = 'none';
-            }
-        };
-
-        chatSend.addEventListener('click', handleChatSubmit);
-        chatInput.addEventListener('keypress', (event) => {
-            if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault();
-                handleChatSubmit();
-            }
-        });
+    // Настройка ChatGPT модального окна
+    let isProcessing = false;
+    
+    const toggleModal = (show) => {
+        chatModal.style.display = show ? 'block' : 'none';
+        if (show) chatInput.focus();
     };
 
-    setupChatGPT();
+    chatButton.addEventListener('click', () => toggleModal(true));
+    closeModalBtn.addEventListener('click', () => toggleModal(false));
+    window.addEventListener('click', (e) => {
+        if (e.target === chatModal) toggleModal(false);
+    });
 
-    // Form Validation
+    const appendMessage = (message, isUser = false) => {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = isUser ? 'user-message' : 'bot-message';
+        messageDiv.textContent = message;
+        chatContainer.appendChild(messageDiv);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    };
+
+    // Обработка отправки сообщения ChatGPT
+    const handleChatSubmit = async () => {
+        if (isProcessing) return;
+
+        const message = chatInput.value.trim();
+        if (!message) return;
+
+        try {
+            isProcessing = true;
+            loadingIndicator.style.display = 'block';
+            chatInput.value = '';
+            appendMessage(message, true);
+
+            const response = await fetch('/chatgpt', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ message })
+            });
+
+            if (!response.ok) throw new Error('Network response was not ok');
+
+            const data = await response.json();
+            appendMessage(data.reply);
+
+            // Сохраняем диалог
+            const currentDialogs = chatgptQuestionsInput.value;
+            const newDialog = `Q: ${message}\nA: ${data.reply}\n---\n`;
+            chatgptQuestionsInput.value = currentDialogs + newDialog;
+
+            // Если это помощь с формулировкой, предлагаем использовать ответ
+            if (message.toLowerCase().includes('помог') || 
+                message.toLowerCase().includes('сформулир')) {
+                if (confirm('Использовать этот ответ в форме?')) {
+                    // Находим активное или последнее поле ввода
+                    const activeElement = document.activeElement;
+                    let targetInput;
+                    
+                    if (activeElement.tagName === 'TEXTAREA' || activeElement.tagName === 'INPUT') {
+                        targetInput = activeElement;
+                    } else {
+                        const inputs = document.querySelectorAll('textarea, input[type="text"]');
+                        targetInput = inputs[inputs.length - 1];
+                    }
+
+                    if (targetInput) {
+                        targetInput.value = data.reply;
+                    }
+                }
+            }
+
+        } catch (error) {
+            console.error('ChatGPT error:', error);
+            appendMessage('Произошла ошибка. Попробуйте еще раз.', false);
+        } finally {
+            isProcessing = false;
+            loadingIndicator.style.display = 'none';
+        }
+    };
+
+    chatSend.addEventListener('click', handleChatSubmit);
+    chatInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleChatSubmit();
+        }
+    });
+
+    // Дополнительный функционал для формы
+    const form = document.getElementById('survey-form');
     if (form) {
-        form.addEventListener('submit', (event) => {
+        form.addEventListener('submit', (e) => {
             const requiredInputs = form.querySelectorAll('[required]');
             let isValid = true;
 
@@ -157,15 +189,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!input.value.trim()) {
                     isValid = false;
                     input.classList.add('error');
-                    input.setAttribute('title', 'Это поле обязательно для заполнения');
-                } else {
-                    input.classList.remove('error');
-                    input.removeAttribute('title');
+                    setTimeout(() => input.classList.remove('error'), 3000);
                 }
             });
 
             if (!isValid) {
-                event.preventDefault();
+                e.preventDefault();
                 alert('Пожалуйста, заполните все обязательные поля');
             }
         });
