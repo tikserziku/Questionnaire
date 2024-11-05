@@ -1,57 +1,375 @@
 {% extends 'base.html' %}
 
+{% block title %}Опрос - {{ 'Начальный' if level == 'beginner' else 'Продвинутый' }} уровень{% endblock %}
+
 {% block content %}
-<h2>Пожалуйста, ответьте на следующие вопросы:</h2>
-<form method="post">
-    {% if level == 'beginner' %}
-        <p>1. Что вы ожидаете узнать на этом курсе?</p>
-        <input type="text" name="expectations">
+<div class="survey-container">
+    <header class="survey-header">
+        <h1>{{ 'Опрос для начинающих' if level == 'beginner' else 'Опрос для продвинутых' }}</h1>
+        <p class="survey-description">Пожалуйста, ответьте на следующие вопросы, чтобы мы могли лучше адаптировать курс под ваши потребности</p>
+    </header>
 
-        <p>2. Имеете ли вы опыт в программировании? Если да, то на каких языках?</p>
-        <input type="text" name="programming_experience">
+    <form method="post" class="survey-form" id="survey-form">
+        <div class="questions-container">
+            {% if level == 'beginner' %}
+                <div class="question-group">
+                    <label for="expectations">1. Что вы ожидаете узнать на этом курсе?</label>
+                    <div class="input-wrapper">
+                        <textarea 
+                            id="expectations" 
+                            name="expectations" 
+                            required
+                            placeholder="Расскажите о ваших целях и ожиданиях..."
+                        ></textarea>
+                        <span class="input-focus-border"></span>
+                    </div>
+                </div>
 
-        <!-- Добавьте остальные вопросы для начинающих -->
-    {% else %}
-        <p>1. Какой у вас опыт работы с искусственным интеллектом?</p>
-        <input type="text" name="ai_experience">
+                <div class="question-group">
+                    <label for="programming_experience">2. Имеете ли вы опыт в программировании?</label>
+                    <div class="input-wrapper">
+                        <textarea 
+                            id="programming_experience" 
+                            name="programming_experience" 
+                            required
+                            placeholder="Опишите ваш опыт программирования, если есть..."
+                        ></textarea>
+                        <span class="input-focus-border"></span>
+                    </div>
+                </div>
+            {% else %}
+                <div class="question-group">
+                    <label for="ai_experience">1. Какой у вас опыт работы с ИИ?</label>
+                    <div class="input-wrapper">
+                        <textarea 
+                            id="ai_experience" 
+                            name="ai_experience" 
+                            required
+                            placeholder="Опишите ваш опыт работы с ИИ..."
+                        ></textarea>
+                        <span class="input-focus-border"></span>
+                    </div>
+                </div>
 
-        <p>2. С какими инструментами и фреймворками вы работали?</p>
-        <input type="text" name="tools">
+                <div class="question-group">
+                    <label for="tools">2. С какими инструментами вы работали?</label>
+                    <div class="input-wrapper">
+                        <textarea 
+                            id="tools" 
+                            name="tools" 
+                            required
+                            placeholder="Перечислите инструменты и фреймворки..."
+                        ></textarea>
+                        <span class="input-focus-border"></span>
+                    </div>
+                </div>
+            {% endif %}
 
-        <!-- Добавьте остальные вопросы для продвинутых -->
-    {% endif %}
+            <div class="question-group">
+                <label for="topics">Интересующие темы:</label>
+                <div class="input-wrapper">
+                    <input 
+                        type="text" 
+                        id="topics" 
+                        name="topics" 
+                        required
+                        placeholder="Введите темы через запятую..."
+                    >
+                    <span class="input-focus-border"></span>
+                </div>
+            </div>
 
-    <p>Ваши интересующие темы:</p>
-    <input type="text" name="topics">
+            <div class="question-group">
+                <label for="comments">Дополнительные пожелания:</label>
+                <div class="input-wrapper">
+                    <textarea 
+                        id="comments" 
+                        name="comments"
+                        placeholder="Ваши пожелания и комментарии..."
+                    ></textarea>
+                    <span class="input-focus-border"></span>
+                </div>
+            </div>
+        </div>
 
-    <p>Дополнительные пожелания:</p>
-    <textarea name="comments"></textarea>
+        <div class="input-assistance">
+            <button type="button" id="voice-button" class="assist-button voice">
+                <span class="icon">🎤</span>
+                <span class="button-text">Голосовой ввод</span>
+            </button>
+            
+            <button type="button" id="chatgpt-button" class="assist-button chatgpt">
+                <span class="icon">💡</span>
+                <span class="button-text">Помощь ChatGPT</span>
+            </button>
+        </div>
 
-    <!-- Кнопка для голосового ввода -->
-    <button type="button" id="voice-button">🎤 Задать вопрос голосом</button>
-    <input type="hidden" name="voice_question" id="voice_question">
+        <input type="hidden" name="voice_question" id="voice_question">
+        <input type="hidden" name="chatgpt_questions" id="chatgpt_questions">
 
-    <!-- Кнопка для помощи с формулировкой вопроса -->
-    <button type="button" id="chatgpt-button">Помощь с формулировкой вопроса</button>
-    <input type="hidden" name="chatgpt_questions" id="chatgpt_questions">
+        <div class="form-actions">
+            <button type="submit" class="submit-button">
+                <span class="icon">📤</span>
+                <span class="button-text">Отправить</span>
+            </button>
+        </div>
+    </form>
 
-    <button type="submit">Отправить</button>
-</form>
-
-<!-- Модальное окно для чата с ChatGPT -->
-<div id="chatgpt-modal" class="modal">
-  <div class="modal-content">
-    <span class="close">&times;</span>
-    <div id="chatgpt-chat">
-      <!-- История чата будет здесь -->
+    <!-- ChatGPT Modal -->
+    <div id="chatgpt-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Помощник ChatGPT</h3>
+                <span class="close">&times;</span>
+            </div>
+            
+            <div id="chatgpt-chat" class="chat-container"></div>
+            
+            <div class="chat-input-container">
+                <input 
+                    type="text" 
+                    id="chatgpt-input" 
+                    placeholder="Введите ваш вопрос..."
+                    class="chat-input"
+                >
+                <button id="chatgpt-send" class="chat-send">
+                    <span class="icon">📤</span>
+                </button>
+            </div>
+        </div>
     </div>
-    <input type="text" id="chatgpt-input" placeholder="Введите сообщение...">
-    <button id="chatgpt-send">Отправить</button>
-  </div>
 </div>
 
-<!-- Индикатор загрузки -->
-<div id="loading-indicator" style="display:none;">Подождите, идет обработка...</div>
+<!-- Loading Indicator -->
+<div id="loading-indicator">
+    <div class="spinner"></div>
+    <span class="loading-text">Обработка...</span>
+</div>
 
-<script src="/static/script.js"></script>
+<style>
+.survey-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.survey-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.survey-header h1 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: #ffffff;
+}
+
+.survey-description {
+    color: #e0e0e0;
+    font-size: 1.1rem;
+}
+
+.survey-form {
+    background: rgba(0, 0, 0, 0.6);
+    padding: 2rem;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+}
+
+.question-group {
+    margin-bottom: 2rem;
+}
+
+.question-group label {
+    display: block;
+    margin-bottom: 0.8rem;
+    font-size: 1.1rem;
+    color: #ffffff;
+}
+
+.input-wrapper {
+    position: relative;
+}
+
+.input-wrapper input,
+.input-wrapper textarea {
+    width: 100%;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: #ffffff;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.input-wrapper textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.input-wrapper input:focus,
+.input-wrapper textarea:focus {
+    outline: none;
+    border-color: #4CAF50;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.input-assistance {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.assist-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 12px 20px;
+    background: rgba(76, 175, 80, 0.2);
+    border: 1px solid rgba(76, 175, 80, 0.3);
+    border-radius: 8px;
+    color: #ffffff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.assist-button:hover {
+    background: rgba(76, 175, 80, 0.3);
+    transform: translateY(-2px);
+}
+
+.submit-button {
+    width: 100%;
+    padding: 15px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.submit-button:hover {
+    background: #45a049;
+    transform: translateY(-2px);
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+}
+
+.modal-content {
+    position: relative;
+    width: 90%;
+    max-width: 600px;
+    margin: 5vh auto;
+    background: #1a1a1a;
+    border-radius: 15px;
+    padding: 1.5rem;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.close {
+    font-size: 1.5rem;
+    color: #ffffff;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.close:hover {
+    color: #4CAF50;
+}
+
+.chat-container {
+    height: 300px;
+    overflow-y: auto;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.chat-input-container {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.chat-input {
+    flex: 1;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: #ffffff;
+}
+
+.chat-send {
+    padding: 12px 20px;
+    background: #4CAF50;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+}
+
+/* Loading Indicator */
+#loading-indicator {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #4CAF50;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-text {
+    margin-top: 1rem;
+    color: #ffffff;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .survey-container {
+        padding: 1rem;
+    }
+
+    .input-assistance {
+        flex-direction: column;
+    }
+
+    .modal-content {
+        width: 95%;
+        margin: 2vh auto;
+    }
+}
+</style>
 {% endblock %}
