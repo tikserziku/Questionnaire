@@ -51,6 +51,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target === chatModal) toggleChatModal(false);
     });
 
+    // Добавляем обработчик клавиши Escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            toggleVoiceModal(false);
+            toggleChatModal(false);
+        }
+    });
+
     // Настройка распознавания речи
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
         const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
@@ -60,10 +68,16 @@ document.addEventListener('DOMContentLoaded', () => {
         recognition.continuous = false;
         recognition.interimResults = false;
 
-        startVoiceBtn.addEventListener('click', () => {
+        // Обработка начала записи
+        recognition.onstart = () => {
+            console.log('Начало записи голоса');
             voiceIndicator.classList.add('recording');
             voiceStatusText.textContent = 'Слушаю...';
             startVoiceBtn.disabled = true;
+            loadingIndicator.style.display = 'block';
+        };
+
+        startVoiceBtn.addEventListener('click', () => {
             recognition.start();
         });
 
@@ -81,7 +95,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     body: JSON.stringify({ voice_input: transcript })
                 });
 
-                if (!response.ok) throw new Error('Network response was not ok');
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error || 'Network response was not ok');
+                }
 
                 const data = await response.json();
                 voiceProcessedText.textContent = data.processed_question;
@@ -102,24 +119,25 @@ document.addEventListener('DOMContentLoaded', () => {
             } finally {
                 voiceIndicator.classList.remove('recording');
                 startVoiceBtn.disabled = false;
+                loadingIndicator.style.display = 'none';
             }
         };
-
         recognition.onerror = (event) => {
             console.error('Speech recognition error:', event.error);
             voiceStatusText.textContent = 'Ошибка распознавания. Попробуйте еще раз';
             voiceIndicator.classList.remove('recording');
             startVoiceBtn.disabled = false;
+            loadingIndicator.style.display = 'none';
         };
 
         recognition.onend = () => {
             voiceIndicator.classList.remove('recording');
             startVoiceBtn.disabled = false;
+            loadingIndicator.style.display = 'none';
         };
 
         // Обработчик кнопки использования результата
         useVoiceResultBtn.addEventListener('click', () => {
-            // Находим активное или последнее поле ввода
             const activeElement = document.activeElement;
             let targetInput;
             
@@ -140,6 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
         voiceButton.style.display = 'none';
         console.log('Speech Recognition API не поддерживается');
     }
+
     // Функционал ChatGPT
     let isProcessing = false;
 
@@ -187,7 +206,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ message })
             });
 
-            if (!response.ok) throw new Error('Network response was not ok');
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || 'Network response was not ok');
+            }
 
             const data = await response.json();
             appendMessage(data.reply);
@@ -213,14 +235,6 @@ document.addEventListener('DOMContentLoaded', () => {
             handleChatSubmit();
         }
     });
-
-    // Добавьте после обработчиков модальных окон
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-        toggleVoiceModal(false);
-        toggleChatModal(false);
-    }
-});
     
     // Валидация формы
     const form = document.getElementById('survey-form');
