@@ -102,12 +102,31 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     const appendMessage = (message, isUser = false) => {
-        const messageDiv = document.createElement('div');
-        messageDiv.className = isUser ? 'user-message' : 'bot-message';
-        messageDiv.textContent = message;
-        chatContainer.appendChild(messageDiv);
-        chatContainer.scrollTop = chatContainer.scrollHeight;
-    };
+    const messageDiv = document.createElement('div');
+    messageDiv.className = isUser ? 'user-message' : 'bot-message';
+    messageDiv.textContent = message;
+    
+    // Добавляем разделитель
+    const divider = document.createElement('div');
+    divider.className = 'message-divider';
+    
+    chatContainer.appendChild(messageDiv);
+    chatContainer.appendChild(divider);
+    
+    // Прокрутка к последнему сообщению
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+
+    // Добавляем эффект появления
+    messageDiv.style.opacity = '0';
+    messageDiv.style.transform = 'translateY(20px)';
+    
+    // Запускаем анимацию
+    requestAnimationFrame(() => {
+        messageDiv.style.transition = 'all 0.3s ease';
+        messageDiv.style.opacity = '1';
+        messageDiv.style.transform = 'translateY(0)';
+    });
+};
 
     // Обработка отправки сообщения ChatGPT
     const handleChatSubmit = async () => {
