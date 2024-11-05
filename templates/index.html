@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Добро пожаловать на курс по искусственному интеллекту!</h1>
+<form method="post">
+    <p>Выберите ваш уровень знаний:</p>
+    <button type="submit" name="level" value="beginner">Я начинающий</button>
+    <button type="submit" name="level" value="advanced">Я продвинутый</button>
+</form>
+{% endblock %}
