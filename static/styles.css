@@ -1,16 +1,11 @@
-/* Base styles */
+/* Основные стили */
 :root {
     --primary-color: #4CAF50;
     --primary-hover: #45a049;
-    --text-color: #ffffff;
     --bg-dark: rgba(0, 0, 0, 0.8);
-    --bg-modal: #222;
-    --border-color: #444;
-    --chat-user: #4CAF50;
-    --chat-bot: #00BCD4;
+    --text-light: #ffffff;
 }
 
-/* Reset and base styles */
 * {
     margin: 0;
     padding: 0;
@@ -18,41 +13,46 @@
 }
 
 body {
-    background-image: url('/static/background.jpg');
+    background-image: url('/static/background01.png');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
-    color: var(--text-color);
-    font-family: 'Arial', sans-serif;
+    color: var(--text-light);
+    font-family: Arial, sans-serif;
     line-height: 1.6;
     min-height: 100vh;
-    padding: 20px;
     position: relative;
-    padding-bottom: 60px; /* Space for footer */
 }
 
-/* Typography */
+/* Оверлей для лучшей читаемости */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: -1;
+}
+
+/* Типография */
 h1, h2 {
     margin: 2rem 0;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
-/* Form elements */
-.form-container {
+/* Формы */
+form {
+    margin: 2rem auto;
     max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
+    padding: 2rem;
     background: rgba(0, 0, 0, 0.6);
     border-radius: 10px;
     backdrop-filter: blur(5px);
 }
 
-form {
-    margin-top: 2rem;
-}
-
 input, textarea, button {
-    display: block;
     width: 100%;
     max-width: 400px;
     margin: 1rem auto;
@@ -60,7 +60,8 @@ input, textarea, button {
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 5px;
     background: rgba(255, 255, 255, 0.1);
-    color: var(--text-color);
+    color: var(--text-light);
+    font-size: 1rem;
     transition: all 0.3s ease;
 }
 
@@ -72,7 +73,7 @@ input:focus, textarea:focus {
 
 button {
     background-color: var(--primary-color);
-    color: var(--text-color);
+    color: var(--text-light);
     border: none;
     cursor: pointer;
     font-weight: bold;
@@ -81,7 +82,7 @@ button {
 
 button:hover {
     background-color: var(--primary-hover);
-    transform: translateY(-1px);
+    transform: translateY(-2px);
 }
 
 button:disabled {
@@ -90,11 +91,10 @@ button:disabled {
     transform: none;
 }
 
-/* Footer */
+/* Футер */
 footer {
     position: fixed;
     bottom: 0;
-    left: 0;
     width: 100%;
     background-color: var(--bg-dark);
     padding: 15px;
@@ -103,7 +103,7 @@ footer {
 }
 
 footer a {
-    color: var(--text-color);
+    color: var(--text-light);
     text-decoration: none;
     transition: color 0.3s ease;
 }
@@ -112,19 +112,18 @@ footer a:hover {
     color: var(--primary-color);
 }
 
-/* Modal styles */
+/* Модальное окно */
 .modal {
     display: none;
     position: fixed;
     inset: 0;
     background-color: var(--bg-dark);
     z-index: 1000;
-    overflow-y: auto;
     animation: fadeIn 0.3s ease;
 }
 
 .modal-content {
-    background-color: var(--bg-modal);
+    background-color: #222;
     margin: 5% auto;
     padding: 2rem;
     border-radius: 10px;
@@ -145,14 +144,14 @@ footer a:hover {
 }
 
 .close:hover {
-    color: var(--text-color);
+    color: var(--text-light);
 }
 
-/* Chat styles */
+/* Чат */
 #chatgpt-chat {
     height: 300px;
     overflow-y: auto;
-    border: 1px solid var(--border-color);
+    border: 1px solid #444;
     padding: 15px;
     background-color: rgba(0, 0, 0, 0.3);
     border-radius: 5px;
@@ -168,18 +167,20 @@ footer a:hover {
 }
 
 .user-message {
-    background-color: var(--chat-user);
+    background-color: rgba(76, 175, 80, 0.3);
     margin-left: auto;
+    text-align: right;
     border-radius: 15px 15px 0 15px;
 }
 
 .bot-message {
-    background-color: var(--chat-bot);
+    background-color: rgba(33, 150, 243, 0.3);
     margin-right: auto;
+    text-align: left;
     border-radius: 15px 15px 15px 0;
 }
 
-/* Loading indicator */
+/* Индикатор загрузки */
 #loading-indicator {
     position: fixed;
     top: 50%;
@@ -193,84 +194,130 @@ footer a:hover {
     animation: fadeIn 0.3s ease;
 }
 
-/* Animations */
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Контейнеры и разделы */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.question-group {
+    margin-bottom: 2rem;
+}
+
+.checkbox-group {
+    text-align: left;
+    margin: 1rem 0;
+}
+
+.checkbox-item {
+    margin: 0.5rem 0;
+}
+
+/* Анимации */
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
 }
 
 @keyframes slideIn {
-    from { transform: translateY(-20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+    from { 
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to { 
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-/* Media queries */
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Медиа-запросы */
 @media (max-width: 768px) {
-    body {
-        padding: 10px;
+    .container {
+        padding: 0 0.5rem;
     }
 
-    h1, h2 {
-        margin: 1rem 0;
+    form {
+        padding: 1rem;
+        margin: 1rem;
     }
 
     .modal-content {
-        margin: 10% auto;
-        padding: 1rem;
         width: 95%;
+        margin: 2vh auto;
     }
 
-    input, textarea, button {
-        max-width: 100%;
+    button {
+        width: 100%;
+        max-width: none;
     }
 }
 
-/* Accessibility */
-@media (prefers-reduced-motion: reduce) {
-    * {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-        scroll-behavior: auto !important;
-    }
-}
-/* Добавить в конец существующего styles.css */
-
-.thank-you-container {
-    margin: 50px auto;
-    max-width: 600px;
-}
-
-.next-steps {
-    margin: 30px auto;
-    text-align: left;
-}
-
-.next-steps ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 20px 0;
-}
-
-.next-steps li {
-    margin: 10px 0;
-    padding-left: 25px;
-    position: relative;
-}
-
-.next-steps li:before {
-    content: "✓";
+/* Улучшения доступности */
+.skip-link {
     position: absolute;
+    top: -40px;
     left: 0;
-    color: #4CAF50;
+    background: var(--primary-color);
+    color: white;
+    padding: 8px;
+    z-index: 100;
+    transition: top 0.3s ease;
 }
 
+.skip-link:focus {
+    top: 0;
+}
 
-/* High contrast mode */
-@media (prefers-contrast: high) {
-    :root {
-        --primary-color: #00ff00;
-        --chat-user: #00ff00;
-        --chat-bot: #00ffff;
-    }
+/* Состояния форм */
+.error {
+    border-color: #ff4444;
+}
+
+.success {
+    border-color: #00C851;
+}
+
+/* Уведомления */
+.alert {
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 5px;
+    animation: slideIn 0.3s ease;
+}
+
+.alert-error {
+    background-color: rgba(255, 68, 68, 0.2);
+    border: 1px solid #ff4444;
+}
+
+.alert-success {
+    background-color: rgba(0, 200, 81, 0.2);
+    border: 1px solid #00C851;
+}
+
+/* Предзагрузка фонов */
+body::after {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    z-index: -1;
+    content: url('/static/background01.png') 
+             url('/static/background02.png')
+             url('/static/background03.png')
+             url('/static/background04.png');
 }
