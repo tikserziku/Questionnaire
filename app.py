@@ -273,7 +273,7 @@ def process_voice():
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "Please correct and clarify the following question:"},
+                {"role": "system", "content": "Ты помощник, который должен ответить на вопрос пользователя. Дай краткий и точный ответ."},
                 {"role": "user", "content": voice_input}
             ],
             max_tokens=150,
