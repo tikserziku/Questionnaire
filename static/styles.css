@@ -1,3 +1,77 @@
+/* Стили для главной страницы */
+.welcome-container {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.level-selection {
+    margin-top: 40px;
+}
+
+.level-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin: 0 auto;
+    max-width: 800px;
+}
+
+.level-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px;
+    background: rgba(0, 0, 0, 0.6);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    width: 100%;
+}
+
+.level-card:hover {
+    transform: translateY(-5px);
+    background: rgba(0, 0, 0, 0.7);
+    border-color: var(--primary-color);
+}
+
+.card-icon {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+}
+
+.level-card h2 {
+    margin: 10px 0;
+    color: #ffffff;
+    font-size: 1.5rem;
+}
+
+.level-card p {
+    color: #cccccc;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.beginner .card-icon {
+    color: #4CAF50;
+}
+
+.advanced .card-icon {
+    color: #FFC107;
+}
+
+@media (max-width: 768px) {
+    .level-cards {
+        grid-template-columns: 1fr;
+    }
+    
+    .level-card {
+        padding: 20px;
+    }
+}
+
 /* Основные стили */
 :root {
     --primary-color: #4CAF50;
