@@ -1,0 +1,6 @@
+Flask
+gunicorn
+pandas
+matplotlib
+openai
+Flask-Limiter
