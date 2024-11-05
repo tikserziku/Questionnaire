@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Пожалуйста, ответьте на следующие вопросы:</h2>
+<form method="post">
+    {% if level == 'beginner' %}
+        <p>1. Что вы ожидаете узнать на этом курсе?</p>
+        <input type="text" name="expectations">
+
+        <p>2. Имеете ли вы опыт в программировании? Если да, то на каких языках?</p>
+        <input type="text" name="programming_experience">
+
+        <!-- Добавьте остальные вопросы для начинающих -->
+    {% else %}
+        <p>1. Какой у вас опыт работы с искусственным интеллектом?</p>
+        <input type="text" name="ai_experience">
+
+        <p>2. С какими инструментами и фреймворками вы работали?</p>
+        <input type="text" name="tools">
+
+        <!-- Добавьте остальные вопросы для продвинутых -->
+    {% endif %}
+
+    <p>Ваши интересующие темы:</p>
+    <input type="text" name="topics">
+
+    <p>Дополнительные пожелания:</p>
+    <textarea name="comments"></textarea>
+
+    <!-- Кнопка для голосового ввода -->
+    <button type="button" id="voice-button">🎤 Задать вопрос голосом</button>
+    <input type="hidden" name="voice_question" id="voice_question">
+
+    <!-- Кнопка для помощи с формулировкой вопроса -->
+    <button type="button" id="chatgpt-button">Помощь с формулировкой вопроса</button>
+    <input type="hidden" name="chatgpt_questions" id="chatgpt_questions">
+
+    <button type="submit">Отправить</button>
+</form>
+
+<!-- Модальное окно для чата с ChatGPT -->
+<div id="chatgpt-modal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <div id="chatgpt-chat">
+      <!-- История чата будет здесь -->
+    </div>
+    <input type="text" id="chatgpt-input" placeholder="Введите сообщение...">
+    <button id="chatgpt-send">Отправить</button>
+  </div>
+</div>
+
+<!-- Индикатор загрузки -->
+<div id="loading-indicator" style="display:none;">Подождите, идет обработка...</div>
+
+<script src="/static/script.js"></script>
+{% endblock %}
