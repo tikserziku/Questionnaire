@@ -2,13 +2,88 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}Анкета по ИИ{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="Анкета по искусственному интеллекту">
+    <meta name="keywords" content="ИИ, искусственный интеллект, анкета, опрос">
+    <meta name="author" content="Your Name">
+    <meta name="theme-color" content="#4CAF50">
+    
+    <!-- Security headers -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    
+    <title>{% block title %}Анкета по ИИ{% endblock %} | AI Survey</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/static/favicon.png">
+    <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
+    
+    <!-- Styles -->
     <link rel="stylesheet" href="/static/styles.css">
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="/static/background.jpg" as="image">
+    
+    <!-- Open Graph tags -->
+    <meta property="og:title" content="Анкета по искусственному интеллекту">
+    <meta property="og:description" content="Пройдите нашу анкету по ИИ">
+    <meta property="og:image" content="/static/og-image.jpg">
+    <meta property="og:url" content="{{ request.url }}">
+    
+    {% block extra_head %}{% endblock %}
 </head>
 <body>
-    {% block content %}{% endblock %}
-    <footer>
-        <a href="/privacy_policy">Политика конфиденциальности</a>
-    </footer>
+    <!-- Skip navigation for accessibility -->
+    <a href="#main-content" class="skip-link">Перейти к основному содержанию</a>
+    
+    <div class="page-wrapper">
+        <header class="main-header">
+            <nav class="main-nav">
+                <a href="/" class="logo">AI Survey</a>
+                {% block navigation %}{% endblock %}
+            </nav>
+        </header>
+
+        <main id="main-content" class="main-content">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-messages">
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </main>
+
+        <footer class="main-footer">
+            <div class="footer-content">
+                <nav class="footer-nav">
+                    <a href="/privacy_policy">Политика конфиденциальности</a>
+                    <a href="/terms">Условия использования</a>
+                    <a href="/contact">Контакты</a>
+                </nav>
+                <p class="copyright">&copy; {% now 'Y' %} AI Survey. Все права защищены.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Loading indicator -->
+    <div id="loading-indicator" style="display:none;">
+        <div class="spinner"></div>
+        <span>Загрузка...</span>
+    </div>
+
+    <!-- Base scripts -->
+    <script src="/static/script.js" defer></script>
+    {% block extra_scripts %}{% endblock %}
+
+    <!-- Analytics (if needed) -->
+    {% if not debug %}
+        <!-- Add your analytics code here -->
+    {% endif %}
 </body>
 </html>
