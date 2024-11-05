@@ -31,13 +31,27 @@ limiter = Limiter(
 )
 
 def get_db_connection():
-    DATABASE_URL = os.getenv('DATABASE_URL')
-    if not DATABASE_URL:
-        logger.error("Ошибка: переменная окружения DATABASE_URL не установлена.")
-        raise Exception("Переменная окружения DATABASE_URL не установлена.")
+    # Получение данных для подключения к базе данных из переменных окружения Stackhero
+    host = os.getenv('STACKHERO_POSTGRESQL_HOST')
+    port = os.getenv('STACKHERO_POSTGRESQL_PORT', '5432')
+    dbname = os.getenv('STACKHERO_POSTGRESQL_DATABASE')
+    user = os.getenv('STACKHERO_POSTGRESQL_ADMIN_LOGIN')
+    password = os.getenv('STACKHERO_POSTGRESQL_ADMIN_PASSWORD')
+    sslmode = 'require'
+
+    if not all([host, port, dbname, user, password]):
+        logger.error("Переменные окружения для подключения к базе данных не установлены правильно.")
+        raise Exception("Переменные окружения для подключения к базе данных не установлены правильно.")
 
     try:
-        conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+        conn = psycopg2.connect(
+            host=host,
+            port=port,
+            dbname=dbname,
+            user=user,
+            password=password,
+            sslmode=sslmode
+        )
         return conn
     except Exception as e:
         logger.error(f"Ошибка подключения к базе данных: {e}")
