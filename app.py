@@ -1,15 +1,33 @@
 import os
-import sqlite3
-from datetime import datetime
+import sys
+import logging
 from flask import Flask, render_template, request, redirect, jsonify
-import openai
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+import openai
+import psycopg2
+from psycopg2.extras import RealDictCursor
+from datetime import datetime
+
+# Настройка логирования
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
-# Настройка OpenAI API
-openai.api_key = os.getenv('OPENAI_API_KEY')
+# Проверка наличия OpenAI API ключа
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+if not OPENAI_API_KEY:
+    logger.error("Ошибка: переменная окружения OPENAI_API_KEY не установлена.")
+    sys.exit(1)
+else:
+    openai.api_key = OPENAI_API_KEY
+
+# Проверка наличия DATABASE_URL
+DATABASE_URL = os.getenv('DATABASE_URL')
+if not DATABASE_URL:
+    logger.error("Ошибка: переменная окружения DATABASE_URL не установлена.")
+    sys.exit(1)
 
 # Настройка ограничения запросов
 limiter = Limiter(
@@ -18,26 +36,42 @@ limiter = Limiter(
     default_limits=["100 per hour"]
 )
 
+def get_db_connection():
+    try:
+        conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+        return conn
+    except Exception as e:
+        logger.error(f"Ошибка подключения к базе данных: {e}")
+        return None
+
 # Главная страница
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    if request.method == 'POST':
-        level = request.form['level']
-        return redirect(f'/questions/{level}')
-    return render_template('index.html')
+    try:
+        if request.method == 'POST':
+            level = request.form['level']
+            return redirect(f'/questions/{level}')
+        return render_template('index.html')
+    except Exception as e:
+        logger.error(f"Ошибка на главной странице: {e}")
+        return "Произошла ошибка на сервере.", 500
 
 # Страница с вопросами
 @app.route('/questions/<level>', methods=['GET', 'POST'])
 def questions(level):
-    if request.method == 'POST':
-        data = dict(request.form)
-        data['level'] = level
-        data['timestamp'] = datetime.now()
-        data['voice_question'] = request.form.get('voice_question')
-        data['chatgpt_questions'] = request.form.get('chatgpt_questions')
-        save_to_db(data)
-        return redirect('/thank_you')
-    return render_template('questions.html', level=level)
+    try:
+        if request.method == 'POST':
+            data = dict(request.form)
+            data['level'] = level
+            data['timestamp'] = datetime.now()
+            data['voice_question'] = request.form.get('voice_question')
+            data['chatgpt_questions'] = request.form.get('chatgpt_questions')
+            save_to_db(data)
+            return redirect('/thank_you')
+        return render_template('questions.html', level=level)
+    except Exception as e:
+        logger.error(f"Ошибка на странице вопросов: {e}")
+        return "Произошла ошибка на сервере.", 500
 
 # Страница благодарности
 @app.route('/thank_you')
@@ -53,7 +87,9 @@ def privacy_policy():
 @app.route('/chatgpt', methods=['POST'])
 @limiter.limit("5 per minute")
 def chatgpt():
-    user_message = request.json['message']
+    user_message = request.json.get('message')
+    if not user_message:
+        return jsonify({'reply': 'Сообщение не должно быть пустым.'}), 400
     try:
         response = openai.Completion.create(
             engine='text-davinci-003',
@@ -65,15 +101,17 @@ def chatgpt():
         )
         bot_reply = response.choices[0].text.strip()
         return jsonify({'reply': bot_reply})
-    except openai.error.OpenAIError as e:
-        print(f"Ошибка OpenAI API: {e}")
+    except Exception as e:
+        logger.error(f"Ошибка при обращении к OpenAI API: {e}")
         return jsonify({'reply': 'Извините, произошла ошибка при обработке вашего запроса.'}), 500
 
 # Обработка голосового ввода и корректировка через ChatGPT
 @app.route('/process_voice', methods=['POST'])
 @limiter.limit("5 per minute")
 def process_voice():
-    voice_input = request.json['voice_input']
+    voice_input = request.json.get('voice_input')
+    if not voice_input:
+        return jsonify({'corrected_question': 'Голосовой ввод не должен быть пустым.'}), 400
     prompt = f"Пожалуйста, откорректируйте следующий вопрос, сделав его ясным и понятным:\n\n{voice_input}"
     try:
         response = openai.Completion.create(
@@ -86,30 +124,41 @@ def process_voice():
         )
         corrected_question = response.choices[0].text.strip()
         return jsonify({'corrected_question': corrected_question})
-    except openai.error.OpenAIError as e:
-        print(f"Ошибка OpenAI API: {e}")
+    except Exception as e:
+        logger.error(f"Ошибка при обращении к OpenAI API: {e}")
         return jsonify({'corrected_question': 'Извините, произошла ошибка при обработке вашего запроса.'}), 500
 
 def save_to_db(data):
-    # Анонимизация данных, удаление чувствительной информации
-    sensitive_fields = ['email', 'phone']
-    for field in sensitive_fields:
-        if field in data:
-            data[field] = 'REDACTED'
-    conn = sqlite3.connect('database.db')
-    c = conn.cursor()
-    c.execute('''CREATE TABLE IF NOT EXISTS responses (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    level TEXT,
-                    data TEXT,
-                    voice_question TEXT,
-                    chatgpt_questions TEXT,
-                    timestamp DATETIME
-                )''')
-    c.execute('INSERT INTO responses (level, data, voice_question, chatgpt_questions, timestamp) VALUES (?, ?, ?, ?, ?)', 
-              (data.get('level'), str(data), data.get('voice_question'), data.get('chatgpt_questions'), data.get('timestamp')))
-    conn.commit()
-    conn.close()
+    try:
+        # Анонимизация данных, удаление чувствительной информации
+        sensitive_fields = ['email', 'phone']
+        for field in sensitive_fields:
+            if field in data:
+                data[field] = 'REDACTED'
+        conn = get_db_connection()
+        if conn is None:
+            logger.error("Не удалось установить соединение с базой данных.")
+            return
+        c = conn.cursor()
+        c.execute('''CREATE TABLE IF NOT EXISTS responses (
+                        id SERIAL PRIMARY KEY,
+                        level TEXT,
+                        data TEXT,
+                        voice_question TEXT,
+                        chatgpt_questions TEXT,
+                        timestamp TIMESTAMP
+                    )''')
+        c.execute('INSERT INTO responses (level, data, voice_question, chatgpt_questions, timestamp) VALUES (%s, %s, %s, %s, %s)', 
+                  (data.get('level'), str(data), data.get('voice_question'), data.get('chatgpt_questions'), data.get('timestamp')))
+        conn.commit()
+        c.close()
+        conn.close()
+    except Exception as e:
+        logger.error(f"Ошибка при сохранении данных в базу: {e}")
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    try:
+        app.run(debug=True)
+    except Exception as e:
+        logger.error(f"Ошибка при запуске приложения: {e}")
+        sys.exit(1)
