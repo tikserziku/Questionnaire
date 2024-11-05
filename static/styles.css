@@ -61,7 +61,25 @@ h1 {
 .voice-button.listening {
     animation: pulse 1.5s infinite;
 }
+.listening {
+    animation: pulse 1.5s infinite;
+    background-color: #ff4444;
+}
 
+.voice-input-success {
+    animation: flash 0.5s;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+@keyframes flash {
+    0% { background-color: rgba(76, 175, 80, 0.2); }
+    100% { background-color: transparent; }
+}
 @keyframes pulse {
     0% {
         transform: scale(1);
