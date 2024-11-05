@@ -69,5 +69,37 @@
             </div>
         </div>
     </div>
+    <div id="voice-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Голосовой ввод</h3>
+            <span class="close-voice">&times;</span>
+        </div>
+        <div class="voice-content">
+            <div class="voice-status">
+                <div class="voice-indicator"></div>
+                <span class="voice-status-text">Нажмите кнопку для начала записи</span>
+            </div>
+            <div class="voice-result">
+                <div class="voice-original">
+                    <h4>Распознанный текст:</h4>
+                    <p id="voice-original-text"></p>
+                </div>
+                <div class="voice-processed">
+                    <h4>Обработанный ответ:</h4>
+                    <p id="voice-processed-text"></p>
+                </div>
+            </div>
+            <div class="voice-actions">
+                <button id="start-voice" class="voice-action-button">
+                    <span class="icon">🎤</span> Начать запись
+                </button>
+                <button id="use-voice-result" class="voice-action-button" disabled>
+                    Использовать ответ
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 </div>
 {% endblock %}
