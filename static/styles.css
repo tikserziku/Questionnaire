@@ -234,6 +234,37 @@ footer a:hover {
         scroll-behavior: auto !important;
     }
 }
+/* Добавить в конец существующего styles.css */
+
+.thank-you-container {
+    margin: 50px auto;
+    max-width: 600px;
+}
+
+.next-steps {
+    margin: 30px auto;
+    text-align: left;
+}
+
+.next-steps ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 20px 0;
+}
+
+.next-steps li {
+    margin: 10px 0;
+    padding-left: 25px;
+    position: relative;
+}
+
+.next-steps li:before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #4CAF50;
+}
+
 
 /* High contrast mode */
 @media (prefers-contrast: high) {
