@@ -1,3 +1,143 @@
+/* Расширенные переменные */
+:root {
+    --primary-color: #4CAF50;
+    --primary-dark: #45a049;
+    --text-color: #ffffff;
+    --bg-dark: rgba(0, 0, 0, 0.6);
+    --gradient-start: #1a1a1a;
+    --gradient-mid: #2c2c2c;
+    --gradient-end: #1a1a1a;
+    --animation-timing: 0.3s ease;
+    --border-radius: 8px;
+}
+
+/* Оптимизированный динамический фон */
+@keyframes gradientMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@keyframes patternFloat {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0); }
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    color: var(--text-color);
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(
+        135deg,
+        var(--gradient-start) 0%,
+        var(--gradient-mid) 50%,
+        var(--gradient-end) 100%
+    );
+    background-size: 400% 400%;
+    animation: gradientMove 15s ease infinite;
+    position: relative;
+}
+
+/* SVG паттерн поверх фона */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0.1;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    animation: patternFloat 20s ease infinite;
+    z-index: -1;
+}
+
+/* Добавляем светящиеся орбы на фон */
+body::after {
+    content: '';
+    position: fixed;
+    width: 600px;
+    height: 600px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(
+        circle,
+        rgba(76, 175, 80, 0.1) 0%,
+        rgba(76, 175, 80, 0) 70%
+    );
+    filter: blur(80px);
+    z-index: -1;
+    animation: orbPulse 8s ease infinite;
+}
+
+@keyframes orbPulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+    50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.3; }
+}
+
+/* Оптимизация производительности */
+* {
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Оптимизация рендеринга для анимаций */
+.level-card,
+.assist-button,
+.submit-button,
+.policy-section {
+    will-change: transform;
+    transform: translateZ(0);
+}
+
+/* Улучшенная производительность скролла */
+.experience-list,
+#chatgpt-chat {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
+}
+
+/* Оптимизация для мобильных устройств */
+@media (max-width: 768px) {
+    body::after {
+        width: 300px;
+        height: 300px;
+    }
+    
+    .container {
+        padding: 1rem;
+    }
+
+    /* Отключаем тяжелые анимации на мобильных */
+    body::before {
+        animation: none;
+    }
+}
+
+/* Оптимизация для устройств с предпочтением уменьшенного движения */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* Остальные стили остаются без изменений... */
 /* Базовые стили */
 :root {
     --primary-color: #4CAF50;
