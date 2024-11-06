@@ -479,6 +479,87 @@ def public_insights():
         logger.error(f"Error loading public insights: {e}")
         return jsonify({'error': 'Failed to load insights'}), 500
 
+def get_db_connection():
+    """Создание соединения с базой данных PostgreSQL"""
+    try:
+        conn = psycopg2.connect(
+            dbname='postgres',
+            user='postgres',
+            password=os.environ['STACKHERO_POSTGRESQL_ADMIN_PASSWORD'],
+            host=os.environ['STACKHERO_POSTGRESQL_HOST'],
+            port=os.environ['STACKHERO_POSTGRESQL_PORT'],
+            connect_timeout=5
+        )
+        return conn
+    except Exception as e:
+        logger.error(f"Database connection error: {e}")
+        return None
+
+@app.route('/analytics')
+def analytics():
+    """Analytics dashboard route"""
+    try:
+        conn = get_db_connection()
+        if not conn:
+            logger.error("Failed to connect to database")
+            flash("Ошибка подключения к базе данных", "error")
+            return redirect(url_for('index'))
+
+        with conn.cursor() as cur:
+            # Получаем общую статистику
+            cur.execute("""
+                SELECT 
+                    level,
+                    COUNT(*) as count,
+                    MIN(timestamp) as first_response,
+                    MAX(timestamp) as last_response
+                FROM responses 
+                GROUP BY level
+            """)
+            overall_stats = cur.fetchall()
+
+            # Получаем статистику по интересам
+            cur.execute("""
+                SELECT 
+                    unnest(string_to_array(data->>'topics', ',')) as topic,
+                    COUNT(*) as count
+                FROM responses
+                GROUP BY topic
+                ORDER BY count DESC
+                LIMIT 10
+            """)
+            topic_stats = dict(cur.fetchall())
+
+            # Получаем данные об опыте
+            cur.execute("""
+                SELECT 
+                    level,
+                    data->>'experience' as exp,
+                    data->>'programming_experience' as prog_exp,
+                    data->>'ai_experience' as ai_exp
+                FROM responses
+                ORDER BY timestamp DESC
+                LIMIT 10
+            """)
+            experience_data = cur.fetchall()
+
+        # Получаем данные анализа категорий
+        analysis = analyze_manager.generate_topic_analysis()
+
+        return render_template('analytics.html',
+                             overall_stats=overall_stats,
+                             topic_stats=topic_stats,
+                             experience_data=experience_data,
+                             analysis=analysis)
+
+    except Exception as e:
+        logger.error(f"Error loading analytics: {e}")
+        flash("Ошибка при загрузке аналитики", "error")
+        return redirect(url_for('index'))
+    finally:
+        if conn:
+            conn.close()
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
