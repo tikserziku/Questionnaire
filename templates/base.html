@@ -8,6 +8,18 @@
     <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
+    <!-- Добавляем навигационное меню -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <a href="/" class="nav-logo">AI VISAGINAS360</a>
+            <div class="nav-links">
+                <a href="/" class="nav-link">Главная</a>
+                <a href="/analytics" class="nav-link">Аналитика опроса</a>
+                <a href="/privacy_policy" class="nav-link">Политика конфиденциальности</a>
+            </div>
+        </div>
+    </nav>
+
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             <div class="flash-messages">
