@@ -181,17 +181,19 @@ def get_versioned_filename(filename):
 def get_db_connection():
     """Создание соединения с базой данных PostgreSQL"""
     try:
+        logger.info("Attempting connection to Stackhero PostgreSQL")
         conn = psycopg2.connect(
-            dbname='postgres',
-            user='postgres',
-            password=os.environ['KEY'],  # Изменено с STACKHERO_POSTGRESQL_ADMIN_PASSWORD
-            host=os.environ['STACKHERO_POSTGRESQL_HOST'],
-            port=os.environ['STACKHERO_POSTGRESQL_PORT'],
+            dbname='postgresql',  # Используем 'postgresql' вместо 'postgres'
+            user='postgresql',    # Используем 'postgresql' вместо 'postgres'
+            password=os.environ.get('KEY'),
+            host='svc-bwluc3.stackhero-network.com',  # Используем полный домен Stackhero
+            port='5432',          # Стандартный порт PostgreSQL
             connect_timeout=5
         )
+        logger.info("Database connection successful")
         return conn
     except Exception as e:
-        logger.error(f"Database connection error: {e}")
+        logger.error(f"Database connection error details: {str(e)}")
         return None
 
 @app.context_processor
