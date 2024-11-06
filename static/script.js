@@ -22,6 +22,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const voiceResult = document.querySelector('.voice-result');
     const voiceQuestionInput = document.getElementById('voice_question');
 
+    // Функции для индикатора загрузки
+    const showLoader = () => {
+        loadingIndicator.classList.add('active');
+    };
+
+    const hideLoader = () => {
+        loadingIndicator.classList.remove('active');
+    };
+
     // Функции модальных окон
     const toggleVoiceModal = (show) => {
         voiceModal.style.display = show ? 'block' : 'none';
@@ -40,7 +49,31 @@ document.addEventListener('DOMContentLoaded', () => {
         if (show) chatInput.focus();
     };
 
-    // Настройка обработчиков модальных окон
+    // Функция добавления сообщения в чат
+    const appendMessage = (message, isUser = false) => {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = isUser ? 'user-message' : 'bot-message';
+        messageDiv.textContent = message;
+        
+        const divider = document.createElement('div');
+        divider.className = 'message-divider';
+        
+        chatContainer.appendChild(messageDiv);
+        chatContainer.appendChild(divider);
+        
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+
+        messageDiv.style.opacity = '0';
+        messageDiv.style.transform = 'translateY(20px)';
+        
+        requestAnimationFrame(() => {
+            messageDiv.style.transition = 'all 0.3s ease';
+            messageDiv.style.opacity = '1';
+            messageDiv.style.transform = 'translateY(0)';
+        });
+    };
+
+    // Обработчики модальных окон
     voiceButton.addEventListener('click', () => toggleVoiceModal(true));
     closeVoiceBtn.addEventListener('click', () => toggleVoiceModal(false));
     chatButton.addEventListener('click', () => toggleChatModal(true));
@@ -51,7 +84,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target === chatModal) toggleChatModal(false);
     });
 
-    // Добавляем обработчик клавиши Escape
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             toggleVoiceModal(false);
@@ -68,18 +100,13 @@ document.addEventListener('DOMContentLoaded', () => {
         recognition.continuous = false;
         recognition.interimResults = false;
 
-        // Обработка начала записи
         recognition.onstart = () => {
             console.log('Начало записи голоса');
             voiceIndicator.classList.add('recording');
             voiceStatusText.textContent = 'Слушаю...';
             startVoiceBtn.disabled = true;
-            loadingIndicator.style.display = 'block';
+            showLoader();
         };
-
-        startVoiceBtn.addEventListener('click', () => {
-            recognition.start();
-        });
 
         recognition.onresult = async (event) => {
             const transcript = event.results[0][0].transcript;
@@ -106,7 +133,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 useVoiceResultBtn.disabled = false;
                 voiceStatusText.textContent = 'Готово! Можете использовать результат или начать новую запись';
 
-                // Сохраняем результат для анализа
                 voiceQuestionInput.value = JSON.stringify({
                     original: transcript,
                     processed: data.processed_question,
@@ -119,24 +145,26 @@ document.addEventListener('DOMContentLoaded', () => {
             } finally {
                 voiceIndicator.classList.remove('recording');
                 startVoiceBtn.disabled = false;
-                loadingIndicator.style.display = 'none';
+                hideLoader();
             }
         };
+
         recognition.onerror = (event) => {
             console.error('Speech recognition error:', event.error);
             voiceStatusText.textContent = 'Ошибка распознавания. Попробуйте еще раз';
             voiceIndicator.classList.remove('recording');
             startVoiceBtn.disabled = false;
-            loadingIndicator.style.display = 'none';
+            hideLoader();
         };
 
         recognition.onend = () => {
             voiceIndicator.classList.remove('recording');
             startVoiceBtn.disabled = false;
-            loadingIndicator.style.display = 'none';
+            hideLoader();
         };
 
-        // Обработчик кнопки использования результата
+        startVoiceBtn.addEventListener('click', () => recognition.start());
+
         useVoiceResultBtn.addEventListener('click', () => {
             const activeElement = document.activeElement;
             let targetInput;
@@ -162,38 +190,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // Функционал ChatGPT
     let isProcessing = false;
 
-    const appendMessage = (message, isUser = false) => {
-        const messageDiv = document.createElement('div');
-        messageDiv.className = isUser ? 'user-message' : 'bot-message';
-        messageDiv.textContent = message;
-        
-        const divider = document.createElement('div');
-        divider.className = 'message-divider';
-        
-        chatContainer.appendChild(messageDiv);
-        chatContainer.appendChild(divider);
-        
-        chatContainer.scrollTop = chatContainer.scrollHeight;
-
-        messageDiv.style.opacity = '0';
-        messageDiv.style.transform = 'translateY(20px)';
-        
-        requestAnimationFrame(() => {
-            messageDiv.style.transition = 'all 0.3s ease';
-            messageDiv.style.opacity = '1';
-            messageDiv.style.transform = 'translateY(0)';
-        });
-    };
-
     const handleChatSubmit = async () => {
         if (isProcessing) return;
-
+        
         const message = chatInput.value.trim();
         if (!message) return;
 
         try {
             isProcessing = true;
-            loadingIndicator.style.display = 'block';
+            showLoader();
             
             chatInput.value = '';
             appendMessage(message, true);
@@ -223,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
             appendMessage('Произошла ошибка. Попробуйте еще раз.', false);
         } finally {
             isProcessing = false;
-            loadingIndicator.style.display = 'none';
+            hideLoader();
             chatInput.focus();
         }
     };

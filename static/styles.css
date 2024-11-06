@@ -1,37 +1,207 @@
-/* Базовые стили */
+/* Расширенные переменные */
 :root {
     --primary-color: #4CAF50;
+    --primary-dark: #45a049;
     --text-color: #ffffff;
-    --bg-dark: rgba(0, 0, 0, 0.6);
+    --bg-dark: rgba(24, 28, 37, 0.85);
+    --gradient-start: #1a202c;
+    --gradient-mid: #2d3748;
+    --gradient-end: #1a202c;
+    --card-bg: rgba(26, 32, 44, 0.95);
+    --input-bg: rgba(45, 55, 72, 0.5);
+    --hover-bg: rgba(76, 175, 80, 0.1);
+    --chat-blue: rgba(33, 150, 243, 0.2);
+    --animation-timing: 0.3s ease;
+    --border-radius: 8px;
+    --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
+/* Анимации */
+@keyframes gradientMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@keyframes patternFloat {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0); }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes orbPulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+    50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.3; }
+}
+
+/* Базовые стили */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-    background-image: url('/static/background01.png');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
     font-family: Arial, sans-serif;
     color: var(--text-color);
     line-height: 1.6;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    background: linear-gradient(
+        135deg,
+        var(--gradient-start) 0%,
+        var(--gradient-mid) 50%,
+        var(--gradient-end) 100%
+    );
+    background-size: 400% 400%;
+    animation: gradientMove 15s ease infinite;
+    position: relative;
+}
+
+/* SVG паттерн поверх фона */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0.1;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    animation: patternFloat 20s ease infinite;
+    z-index: -1;
+}
+
+/* Светящийся орб на фоне */
+body::after {
+    content: '';
+    position: fixed;
+    width: 600px;
+    height: 600px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(
+        circle,
+        rgba(76, 175, 80, 0.1) 0%,
+        rgba(76, 175, 80, 0) 70%
+    );
+    filter: blur(80px);
+    z-index: -1;
+    animation: orbPulse 8s ease infinite;
 }
 
 main {
     flex: 1;
     padding: 2rem 1rem;
+    position: relative;
+    z-index: 1;
 }
 
-/* Стили для голосового модального окна */
+/* Заголовки */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--text-color);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    margin-bottom: 1.5rem;
+}
+
+h1 {
+    font-size: 2rem;
+    text-align: center;
+}
+
+/* Стили форм и элементов ввода */
+textarea, 
+input[type="text"] {
+    width: 100%;
+    padding: 1rem;
+    background: var(--input-bg);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius);
+    color: var(--text-color);
+    font-size: 1rem;
+    transition: all var(--animation-timing);
+}
+
+textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+textarea:focus, 
+input[type="text"]:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+    background: rgba(45, 55, 72, 0.7);
+}
+
+/* Кнопки */
+.assist-button,
+.submit-button,
+.voice-action-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.5rem;
+    background: var(--bg-dark);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius);
+    color: var(--text-color);
+    cursor: pointer;
+    transition: all var(--animation-timing);
+    will-change: transform;
+}
+
+.assist-button:hover:not(:disabled),
+.submit-button:hover:not(:disabled),
+.voice-action-button:hover:not(:disabled) {
+    background: var(--hover-bg);
+    transform: translateY(-2px);
+    border-color: var(--primary-color);
+}
+
+.submit-button {
+    width: 100%;
+    background: var(--primary-color);
+    justify-content: center;
+    font-size: 1.1rem;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.submit-button:hover {
+    background: var(--primary-dark);
+}
+
+/* Стили для голосового интерфейса */
 #voice-modal .modal-content {
     max-width: 500px;
+    background: var(--card-bg);
 }
 
 .voice-content {
@@ -45,7 +215,7 @@ main {
     margin-bottom: 20px;
     padding: 15px;
     background: rgba(0, 0, 0, 0.2);
-    border-radius: 8px;
+    border-radius: var(--border-radius);
 }
 
 .voice-indicator {
@@ -61,7 +231,7 @@ main {
 }
 
 .voice-result {
-    display: none; /* Изначально скрыто */
+    display: none;
     margin: 20px 0;
 }
 
@@ -70,16 +240,12 @@ main {
     animation: fadeIn 0.3s ease;
 }
 
-.voice-original, .voice-processed {
+.voice-original, 
+.voice-processed {
     background: rgba(255, 255, 255, 0.05);
     padding: 15px;
-    border-radius: 8px;
+    border-radius: var(--border-radius);
     margin-bottom: 15px;
-}
-
-.voice-original h4, .voice-processed h4 {
-    color: var(--primary-color);
-    margin-bottom: 10px;
 }
 
 .voice-actions {
@@ -89,99 +255,59 @@ main {
     margin-top: 20px;
 }
 
-.voice-action-button {
-    padding: 10px 20px;
-    background: var(--primary-color);
-    border: none;
-    border-radius: 5px;
-    color: white;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    transition: all 0.3s ease;
-}
-
-.voice-action-button:disabled {
-    background: #666;
-    cursor: not-allowed;
-}
-
-.voice-action-button:not(:disabled):hover {
-    transform: translateY(-2px);
-}
-
-@keyframes pulse {
-    0% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.1); opacity: 0.8; }
-    100% { transform: scale(1); opacity: 1; }
-}
-
-/* Общие стили компонентов */
-h1 {
-    font-size: 2rem;
-    margin-bottom: 1.5rem;
-    text-align: center;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-}
-/* Стили для чата */
+/* Стили чата */
 #chatgpt-chat {
     height: 300px;
     overflow-y: auto;
     padding: 1rem;
     background: rgba(255, 255, 255, 0.05);
-    border-radius: 8px;
+    border-radius: var(--border-radius);
     margin-bottom: 1rem;
     display: flex;
     flex-direction: column;
     gap: 1rem;
-}
-.voice-button {
-    position: relative;
-    transition: all 0.3s ease;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
 }
 
-.voice-button:disabled {
-    background-color: #ff4444;
-    cursor: not-allowed;
+/* Стили для кнопки отправки в чате */
+#chatgpt-modal input[type="submit"],
+#chatgpt-send {
+    background-color: #4CAF50;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
 }
 
-.voice-button.listening {
-    animation: pulse 1.5s infinite;
-}
-.listening {
-    animation: pulse 1.5s infinite;
-    background-color: #ff4444;
+#chatgpt-modal input[type="submit"]:hover,
+#chatgpt-send:hover {
+    background-color: #45a049;
 }
 
-.voice-input-success {
-    animation: flash 0.5s;
+/* Стили для поля ввода в чате */
+#chatgpt-modal input[type="text"],
+#chatgpt-input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    margin-right: 8px;
 }
 
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
+/* Контейнер для поля ввода и кнопки */
+.chat-input-container {
+    display: flex;
+    gap: 8px;
+    padding: 8px;
+    align-items: center;
 }
 
-@keyframes flash {
-    0% { background-color: rgba(76, 175, 80, 0.2); }
-    100% { background-color: transparent; }
-}
-@keyframes pulse {
-    0% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.05);
-    }
-    100% {
-        transform: scale(1);
-    }
-}
-
-
-/* Общие стили для сообщений */
 .user-message,
 .bot-message {
     max-width: 85%;
@@ -189,50 +315,44 @@ h1 {
     border-radius: 12px;
     margin: 4px 0;
     word-wrap: break-word;
+    position: relative;
 }
 
-/* Стили для сообщений пользователя */
 .user-message {
-    background: rgba(76, 175, 80, 0.2);
+    background: var(--hover-bg);
     border-top-right-radius: 2px;
     margin-left: auto;
     text-align: right;
     color: #E0E0E0;
-    position: relative;
 }
 
-.user-message::after {
-    content: '';
-    position: absolute;
-    right: -8px;
-    top: 0;
-    border: 8px solid transparent;
-    border-top-color: rgba(76, 175, 80, 0.2);
-}
-
-/* Стили для сообщений бота */
 .bot-message {
-    background: rgba(33, 150, 243, 0.2);
+    background: var(--chat-blue);
     border-top-left-radius: 2px;
     margin-right: auto;
     text-align: left;
-    color: #FFFFFF;
-    position: relative;
 }
 
+.user-message::after,
 .bot-message::after {
     content: '';
     position: absolute;
-    left: -8px;
     top: 0;
     border: 8px solid transparent;
-    border-top-color: rgba(33, 150, 243, 0.2);
 }
 
-/* Добавляем метки для сообщений */
+.user-message::after {
+    right: -8px;
+    border-top-color: var(--hover-bg);
+}
+
+.bot-message::after {
+    left: -8px;
+    border-top-color: var(--chat-blue);
+}
+
 .user-message::before,
 .bot-message::before {
-    content: '';
     position: absolute;
     top: -20px;
     font-size: 0.8rem;
@@ -249,283 +369,7 @@ h1 {
     left: 0;
 }
 
-/* Разделитель между сообщениями */
-.message-divider {
-    height: 1px;
-    background: rgba(255, 255, 255, 0.1);
-    margin: 8px 0;
-}
-
-/* Стили для окна чата */
-.chat-input-container {
-    display: flex;
-    gap: 8px;
-    padding: 12px;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 8px;
-}
-
-.chat-input {
-    flex: 1;
-    padding: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 6px;
-    background: rgba(255, 255, 255, 0.05);
-    color: #FFFFFF;
-    font-size: 14px;
-}
-
-.chat-input:focus {
-    outline: none;
-    border-color: rgba(76, 175, 80, 0.5);
-}
-
-/* Стилизация скроллбара */
-#chatgpt-chat::-webkit-scrollbar {
-    width: 6px;
-}
-
-#chatgpt-chat::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-}
-
-#chatgpt-chat::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 3px;
-}
-
-#chatgpt-chat::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.3);
-}
-
-/* Стили для страницы аналитики */
-.analytics-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem;
-}
-
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
-    margin-top: 2rem;
-}
-
-.stats-card {
-    background: var(--bg-dark);
-    border-radius: 15px;
-    padding: 1.5rem;
-    backdrop-filter: blur(10px);
-}
-
-.stats-card h2 {
-    color: var(--primary-color);
-    margin-bottom: 1.5rem;
-    font-size: 1.5rem;
-}
-
-.stat-item {
-    margin-bottom: 1.5rem;
-    padding-bottom: 1.5rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.stat-item:last-child {
-    border-bottom: none;
-}
-
-.topics-chart {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.topic-bar {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.bar {
-    height: 30px;
-    background: var(--primary-color);
-    border-radius: 15px;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    padding: 0 1rem;
-    color: white;
-    transition: width 0.3s ease;
-}
-
-.topic-name {
-    min-width: 150px;
-}
-
-.experience-list {
-    max-height: 400px;
-    overflow-y: auto;
-}
-
-.experience-item {
-    margin-bottom: 1rem;
-    padding: 1rem;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 8px;
-}
-
-.experience-item h4 {
-    color: var(--primary-color);
-    margin-bottom: 0.5rem;
-}
-
-@media (max-width: 768px) {
-    .analytics-container {
-        padding: 1rem;
-    }
-
-    .stats-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-
-/* Стили для главной страницы */
-.welcome-container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 2rem;
-}
-
-.level-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 2rem;
-    margin-top: 2rem;
-}
-
-.level-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 2rem;
-    background: var(--bg-dark);
-    border: none;
-    border-radius: 1rem;
-    color: var(--text-color);
-    cursor: pointer;
-    transition: transform 0.3s ease;
-}
-
-.level-card:hover {
-    transform: translateY(-5px);
-}
-
-.card-icon {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
-}
-
-.level-card h2 {
-    margin: 1rem 0;
-}
-
-.level-card p {
-    text-align: center;
-    color: #cccccc;
-}
-
-/* Стили для страницы опроса */
-.survey-container {
-    max-width: 800px;
-    margin: 0 auto;
-}
-
-.survey-description {
-    text-align: center;
-    margin-bottom: 2rem;
-    color: #e0e0e0;
-}
-
-.survey-form {
-    background: var(--bg-dark);
-    padding: 2rem;
-    border-radius: 1rem;
-}
-
-.question-group {
-    margin-bottom: 2rem;
-}
-
-.question-group label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: bold;
-}
-
-textarea, input[type="text"] {
-    width: 100%;
-    padding: 0.8rem;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 0.5rem;
-    color: var(--text-color);
-    font-size: 1rem;
-}
-
-textarea {
-    min-height: 100px;
-    resize: vertical;
-}
-
-textarea:focus, input[type="text"]:focus {
-    outline: none;
-    border-color: var(--primary-color);
-}
-
-/* Кнопки помощи */
-.input-assistance {
-    display: flex;
-    gap: 1rem;
-    margin: 2rem 0;
-}
-
-.assist-button {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.8rem 1.5rem;
-    background: rgba(76, 175, 80, 0.2);
-    border: none;
-    border-radius: 0.5rem;
-    color: var(--text-color);
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.assist-button:hover {
-    background: rgba(76, 175, 80, 0.3);
-    transform: translateY(-2px);
-}
-
-.submit-button {
-    width: 100%;
-    padding: 1rem;
-    background: var(--primary-color);
-    border: none;
-    border-radius: 0.5rem;
-    color: var(--text-color);
-    font-size: 1.1rem;
-    cursor: pointer;
-    transition: transform 0.3s ease;
-}
-
-.submit-button:hover {
-    transform: translateY(-2px);
-}
-
-/* Модальное окно */
+/* Модальные окна */
 .modal {
     display: none;
     position: fixed;
@@ -539,12 +383,13 @@ textarea:focus, input[type="text"]:focus {
 
 .modal-content {
     position: relative;
-    background: #1a1a1a;
+    background: var(--card-bg);
     margin: 5vh auto;
     padding: 2rem;
     width: 90%;
     max-width: 600px;
     border-radius: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .modal-header {
@@ -558,31 +403,38 @@ textarea:focus, input[type="text"]:focus {
     color: #aaa;
     font-size: 1.5rem;
     cursor: pointer;
+    transition: color var(--animation-timing);
 }
 
-#chatgpt-chat {
-    height: 300px;
-    overflow-y: auto;
-    padding: 1rem;
-    margin-bottom: 1rem;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 0.5rem;
-}
-
-.chat-input-container {
-    display: flex;
-    gap: 1rem;
+.close:hover {
+    color: var(--text-color);
 }
 
 /* Индикатор загрузки */
 #loading-indicator {
-    display: none;
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.8);
     z-index: 2000;
+    display: none;
     justify-content: center;
     align-items: center;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#loading-indicator.active {
+    display: flex !important; /* Добавим !important для уверенности */
+}
+
+#loading-indicator .spinner {
+    width: 50px;
+    height: 50px;
+}
+
+#loading-indicator span {
+    color: white;
+    font-size: 14px;
 }
 
 .spinner {
@@ -598,115 +450,115 @@ textarea:focus, input[type="text"]:focus {
     to { transform: rotate(360deg); }
 }
 
+/* Контейнеры и карточки */
+.survey-container,
+.welcome-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+    text-align: center;
+}
+
+.welcome-container h1 {
+    font-size: 2.5rem;
+    margin-bottom: 3rem;
+    color: var(--text-color);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.survey-form,
+.level-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2.5rem 2rem;
+    background: var(--card-bg);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    color: var(--text-color);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.card-icon {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.level-card h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: var(--text-color);
+    font-weight: 600;
+}
+
+.level-card p {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.8);
+    max-width: 240px;
+    margin: 0 auto;
+}
 /* Футер */
 footer {
     background: var(--bg-dark);
     padding: 1rem;
     text-align: center;
     margin-top: auto;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .footer-content {
     display: flex;
     justify-content: space-around;
     align-items: center;
+    gap: 1rem;
 }
 
 footer a {
     color: var(--text-color);
     text-decoration: none;
+    transition: color var(--animation-timing);
 }
 
 footer a:hover {
     color: var(--primary-color);
 }
-/* Стили для страницы благодарности */
-.thank-you-container {
-    max-width: 600px;
-    margin: 4rem auto;
-    padding: 2rem;
-    text-align: center;
-    background: var(--bg-dark);
-    border-radius: 15px;
-    backdrop-filter: blur(10px);
-    animation: fadeIn 0.5s ease-out;
-}
 
-.thank-you-container h2 {
-    font-size: 2.5rem;
-    margin-bottom: 1.5rem;
-    color: var(--text-color);
-}
-
-.thank-you-container p {
-    font-size: 1.2rem;
-    color: #e0e0e0;
-    margin-bottom: 2rem;
-}
-
-.next-steps {
-    text-align: left;
-    margin: 2rem 0;
-    padding: 1.5rem;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 10px;
-}
-
-.next-steps p {
-    font-size: 1.3rem;
-    font-weight: bold;
-    margin-bottom: 1rem;
-    color: var(--primary-color);
-}
-
-.next-steps ul {
-    list-style: none;
-    padding: 0;
-}
-
-.next-steps li {
-    margin: 1rem 0;
-    padding-left: 2rem;
-    position: relative;
-}
-
-.next-steps li:before {
-    content: "✓";
-    position: absolute;
-    left: 0;
-    color: var(--primary-color);
-    font-weight: bold;
-}
-
-.thank-you-container .button {
-    display: inline-block;
-    padding: 1rem 2rem;
-    margin-top: 2rem;
-    background: var(--primary-color);
-    color: var(--text-color);
-    text-decoration: none;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-}
-
-.thank-you-container .button:hover {
-    transform: translateY(-2px);
-    background: #45a049;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Адаптивные стили */
+/* Адаптивность */
 @media (max-width: 768px) {
+    .welcome-container {
+        padding: 1.5rem;
+    }
+
+    .welcome-container h1 {
+        font-size: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .level-cards {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .level-card {
+        padding: 2rem 1.5rem;
+    }
+}
+    .input-assistance {
+    display: flex;
+    gap: 1rem;
+    margin: 2rem 0;
+    justify-content: center; /* Добавляем центрирование */
+    flex-direction: row; /* Явно указываем горизонтальное расположение */
+}
+    .footer-content {
+        grid-template-columns: 1fr;
+        flex-direction: column;
+    }
+
     .thank-you-container {
         margin: 2rem 1rem;
         padding: 1.5rem;
@@ -715,149 +567,24 @@ footer a:hover {
     .thank-you-container h2 {
         font-size: 2rem;
     }
-
-    .next-steps {
-        padding: 1rem;
-    }
 }
 
-/* Стили для страницы политики конфиденциальности */
-.privacy-policy-container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 2rem;
-    background: var(--bg-dark);
-    border-radius: 15px;
-    backdrop-filter: blur(10px);
-}
-
-.breadcrumbs {
-    margin-bottom: 2rem;
-    color: #ccc;
-}
-
-.breadcrumbs a {
-    color: var(--primary-color);
-    text-decoration: none;
-}
-
-.breadcrumbs a:hover {
-    text-decoration: underline;
-}
-
-.privacy-content {
-    line-height: 1.6;
-}
-
-.privacy-content h1 {
-    font-size: 2.5rem;
-    margin-bottom: 2rem;
-    text-align: center;
-}
-
-.policy-section {
-    margin: 2rem 0;
-    padding: 1.5rem;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 10px;
-    transition: transform 0.3s ease;
-    animation: fadeIn 0.5s ease-out forwards;
-    animation-delay: calc(var(--section-index) * 0.1s);
-}
-
-.policy-section:hover {
-    transform: translateY(-2px);
-    background: rgba(255, 255, 255, 0.08);
-}
-
-.policy-section h2 {
-    color: var(--primary-color);
-    margin-bottom: 1rem;
-    font-size: 1.5rem;
-}
-
-.policy-section ul {
-    list-style-type: none;
-    padding-left: 1.5rem;
-}
-
-.policy-section ul li {
-    margin: 0.5rem 0;
-    position: relative;
-}
-
-.policy-section ul li:before {
-    content: "•";
-    color: var(--primary-color);
-    position: absolute;
-    left: -1.5rem;
-}
-
-.contact-info {
-    background: rgba(76, 175, 80, 0.1);
-    padding: 1rem;
-    border-radius: 5px;
-    margin-top: 1rem;
-}
-
-.last-update {
-    text-align: right;
-    font-style: italic;
-    color: #ccc;
-    font-size: 0.9rem;
-}
-
-/* Print styles */
-@media print {
-    .privacy-policy-container {
-        background: none;
-        color: #000;
-    }
-
-    .policy-section {
-        break-inside: avoid;
-        background: none;
-    }
-
-    .breadcrumbs {
-        display: none;
-    }
-}
-
-/* Responsive styles */
+/* Для мобильных устройств можно оставить вертикальное расположение */
 @media (max-width: 768px) {
-    .privacy-policy-container {
-        padding: 1rem;
-        margin: 1rem;
-    }
-
-    .privacy-content h1 {
-        font-size: 2rem;
-    }
-
-    .policy-section {
-        padding: 1rem;
-    }
-}
-
-
-/* Адаптивность */
-@media (max-width: 768px) {
-    .level-cards {
-        grid-template-columns: 1fr;
-    }
-
     .input-assistance {
         flex-direction: column;
+        align-items: center;
     }
+}
 
-    .modal-content {
-        width: 95%;
-        margin: 2vh auto;
-    }
-
-    .footer-content {
-        flex-direction: column;
-        gap: 1rem;
+/* Оптимизация для устройств с предпочтением уменьшенного движения */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
     }
 }

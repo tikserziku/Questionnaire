@@ -5,16 +5,14 @@
 {% block content %}
 <div class="welcome-container">
     <h1>Добро пожаловать на курс по искусственному интеллекту!</h1>
-    
     <form method="POST" action="{{ url_for('index') }}">
         <div class="level-cards">
-            <button type="submit" name="level" value="beginner" class="level-card beginner">
+            <button class="level-card" name="level" value="beginner">
                 <div class="card-icon">🌱</div>
                 <h2>Я начинающий</h2>
                 <p>Подходит, если вы только начинаете изучать ИИ</p>
             </button>
-
-            <button type="submit" name="level" value="advanced" class="level-card advanced">
+            <button class="level-card" name="level" value="advanced">
                 <div class="card-icon">⚡</div>
                 <h2>Я продвинутый</h2>
                 <p>Для тех, кто уже имеет опыт работы с ИИ</p>
