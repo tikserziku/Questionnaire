@@ -5,6 +5,19 @@
 {% block content %}
 <div class="welcome-container">
     <h1>Добро пожаловать на курс по искусственному интеллекту!</h1>
+    
+    <!-- Добавляем секцию об аналитике -->
+    <div class="analytics-promo">
+        <h2>Интересно узнать, что выбирают другие?</h2>
+        <p>Посмотрите аналитику ответов участников опроса и узнайте:</p>
+        <ul>
+            <li>Какие темы наиболее популярны</li>
+            <li>Как распределяются участники по уровням</li>
+            <li>Какой опыт имеют другие студенты</li>
+        </ul>
+        <a href="/analytics" class="analytics-button">Посмотреть аналитику</a>
+    </div>
+
     <form method="POST" action="{{ url_for('index') }}">
         <div class="level-cards">
             <button class="level-card" name="level" value="beginner">
