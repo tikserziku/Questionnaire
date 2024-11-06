@@ -181,19 +181,39 @@ def get_versioned_filename(filename):
 def get_db_connection():
     """Создание соединения с базой данных PostgreSQL"""
     try:
-        logger.info("Attempting connection to Stackhero PostgreSQL")
+        # Логируем параметры подключения (кроме пароля)
+        connection_params = {
+            'dbname': 'postgresql',
+            'user': 'postgresql',
+            'host': 'svc-bwluc3.stackhero-network.com',
+            'port': '5432'
+        }
+        logger.info(f"Attempting DB connection with params: {connection_params}")
+        
+        # Проверяем наличие пароля
+        if not os.environ.get('KEY'):
+            logger.error("Database password (KEY) not found in environment variables")
+            return None
+
         conn = psycopg2.connect(
-            dbname='postgresql',  # Используем 'postgresql' вместо 'postgres'
-            user='postgresql',    # Используем 'postgresql' вместо 'postgres'
+            dbname=connection_params['dbname'],
+            user=connection_params['user'],
             password=os.environ.get('KEY'),
-            host='svc-bwluc3.stackhero-network.com',  # Используем полный домен Stackhero
-            port='5432',          # Стандартный порт PostgreSQL
-            connect_timeout=5
+            host=connection_params['host'],
+            port=connection_params['port'],
+            connect_timeout=5,
+            sslmode='require'  # Добавляем SSL-подключение
         )
         logger.info("Database connection successful")
         return conn
+    except psycopg2.OperationalError as e:
+        logger.error(f"Database operational error: {str(e)}")
+        return None
+    except psycopg2.Error as e:
+        logger.error(f"Database error: {str(e)}")
+        return None
     except Exception as e:
-        logger.error(f"Database connection error details: {str(e)}")
+        logger.error(f"Unexpected error during database connection: {str(e)}")
         return None
 
 @app.context_processor
