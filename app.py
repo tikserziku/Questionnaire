@@ -383,13 +383,67 @@ def ratelimit_handler(e):
 def analytics():
     """Analytics dashboard route"""
     try:
-        # Получаем данные для аналитики
+        conn = get_db_connection()
+        if not conn:
+            flash("Ошибка подключения к базе данных", "error")
+            return redirect(url_for('index'))
+
+        with conn.cursor() as cur:
+            # Получаем общую статистику
+            cur.execute("""
+                SELECT 
+                    level,
+                    COUNT(*) as count,
+                    MIN(timestamp) as first_response,
+                    MAX(timestamp) as last_response
+                FROM responses 
+                GROUP BY level
+            """)
+            overall_stats = cur.fetchall()
+
+            # Получаем статистику по темам
+            cur.execute("""
+                SELECT 
+                    topics,
+                    COUNT(*) as count
+                FROM responses
+                WHERE topics IS NOT NULL
+                GROUP BY topics
+                ORDER BY count DESC
+                LIMIT 10
+            """)
+            topic_stats = dict(cur.fetchall())
+
+            # Получаем данные об опыте
+            cur.execute("""
+                SELECT 
+                    level,
+                    data->>'experience' as exp,
+                    data->>'programming_experience' as prog_exp,
+                    data->>'ai_experience' as ai_exp
+                FROM responses
+                ORDER BY timestamp DESC
+                LIMIT 10
+            """)
+            experience_data = cur.fetchall()
+
+        # Получаем данные анализа категорий
         analysis = analyze_manager.generate_topic_analysis()
-        return render_template('analytics.html', analysis=analysis)
+
+        return render_template('analytics.html',
+                             overall_stats=overall_stats,
+                             topic_stats=topic_stats,
+                             experience_data=experience_data,
+                             analysis=analysis)
+
     except Exception as e:
         logger.error(f"Error loading analytics: {e}")
         flash("Ошибка при загрузке аналитики", "error")
         return redirect(url_for('index'))
+
+    finally:
+        if conn:
+            conn.close()
 
 @app.route('/api/topic-analysis')
 def topic_analysis():
