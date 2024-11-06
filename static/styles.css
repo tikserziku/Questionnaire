@@ -726,6 +726,58 @@ footer a:hover {
     padding-top: 2rem;
 }
 
+/* Секция с аналитикой на главной */
+.analytics-promo {
+    background: var(--card-bg);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    margin: 2rem auto;
+    max-width: 800px;
+    text-align: left;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.analytics-promo h2 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.analytics-promo ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 1.5rem 0;
+}
+
+.analytics-promo li {
+    padding: 0.5rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+}
+
+.analytics-promo li:before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--primary-color);
+}
+
+.analytics-button {
+    display: inline-block;
+    padding: 0.8rem 1.5rem;
+    background: var(--primary-color);
+    color: white;
+    text-decoration: none;
+    border-radius: var(--border-radius);
+    margin-top: 1rem;
+    transition: all var(--animation-timing);
+}
+
+.analytics-button:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
+}
+
 /* Оптимизация для устройств с предпочтением уменьшенного движения */
 @media (prefers-reduced-motion: reduce) {
     *,
