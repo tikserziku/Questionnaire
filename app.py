@@ -181,28 +181,23 @@ def get_versioned_filename(filename):
 def get_db_connection():
     """Создание соединения с базой данных PostgreSQL"""
     try:
-        # Логируем параметры подключения (кроме пароля)
         connection_params = {
             'dbname': 'postgresql',
             'user': 'postgresql',
-            'host': 'svc-bwluc3.stackhero-network.com',
-            'port': '5432'
+            'host': os.environ.get('STACKHERO_POSTGRESQL_HOST'),
+            'port': os.environ.get('STACKHERO_POSTGRESQL_PORT'),
+            'password': os.environ.get('STACKHERO_POSTGRESQL_ADMIN_PASSWORD')
         }
-        logger.info(f"Attempting DB connection with params: {connection_params}")
+        logger.info(f"Attempting DB connection with host: {connection_params['host']}, port: {connection_params['port']}")
         
-        # Проверяем наличие пароля
-        if not os.environ.get('KEY'):
-            logger.error("Database password (KEY) not found in environment variables")
-            return None
-
         conn = psycopg2.connect(
             dbname=connection_params['dbname'],
             user=connection_params['user'],
-            password=os.environ.get('KEY'),
+            password=connection_params['password'],
             host=connection_params['host'],
             port=connection_params['port'],
             connect_timeout=5,
-            sslmode='require'  # Добавляем SSL-подключение
+            sslmode='require'
         )
         logger.info("Database connection successful")
         return conn
