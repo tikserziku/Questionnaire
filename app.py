@@ -8,16 +8,14 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 import openai
 import psycopg2
-from datetime import datetime
+from datetime import datetime, timedelta
 from whitenoise import WhiteNoise
-# Добавляем новые импорты
 from functools import lru_cache
 from flask_compress import Compress
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
 import hashlib
 from werkzeug.middleware.proxy_fix import ProxyFix
-from datetime import datetime, timedelta
+from analyze import analyze_manager  # Добавляем импорт analyze_manager
+
 # Настройка логирования
 logging.basicConfig(
     stream=sys.stdout,
@@ -28,6 +26,10 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 app.wsgi_app = WhiteNoise(app.wsgi_app, root='static/')
+compress = Compress(app)  # Добавляем компрессию
+
+# Настройка прокси
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
 # Настройка секретного ключа
 app.secret_key = os.environ.get('SECRET_KEY', os.urandom(24))
@@ -161,35 +163,31 @@ limiter = Limiter(
 # Настройка кэширования
 def get_file_hash(filename):
     """Получение хэша файла для версионирования"""
-    hasher = hashlib.md5()
-    with open(filename, 'rb') as f:
-        buf = f.read(65536)
-        while len(buf) > 0:
-            hasher.update(buf)
+    try:
+        hasher = hashlib.md5()
+        with open(filename, 'rb') as f:
             buf = f.read(65536)
-    return hasher.hexdigest()[:8]
+            while len(buf) > 0:
+                hasher.update(buf)
+                buf = f.read(65536)
+        return hasher.hexdigest()[:8]
+    except Exception as e:
+        logger.error(f"Error generating file hash: {e}")
+        return ""
 
-# Кэширование версий статических файлов
 @lru_cache(maxsize=100)
 def get_versioned_filename(filename):
     """Получение версионированного имени файла"""
-    file_hash
-
-def get_db_connection():
-    """Create database connection with error handling"""
     try:
-        conn = psycopg2.connect(
-            dbname='postgres',
-            user='postgres',
-            password=os.environ['STACKHERO_POSTGRESQL_ADMIN_PASSWORD'],
-            host=os.environ['STACKHERO_POSTGRESQL_HOST'],
-            port=os.environ['STACKHERO_POSTGRESQL_PORT'],
-            connect_timeout=5
-        )
-        return conn
+        full_path = os.path.join(app.static_folder, filename)
+        if os.path.exists(full_path):
+            file_hash = get_file_hash(full_path)
+            name, ext = os.path.splitext(filename)
+            return f"{name}.{file_hash}{ext}"
+        return filename
     except Exception as e:
-        logger.error(f"Database connection error: {e}")
-        return None
+        logger.error(f"Error versioning filename: {e}")
+        return filename
 
 @app.context_processor
 def utility_processor():
@@ -389,6 +387,12 @@ def analytics():
             return redirect(url_for('index'))
 
         with conn.cursor() as cur:
+            # Создаем необходимые индексы, если их нет
+            cur.execute("""
+                CREATE INDEX IF NOT EXISTS idx_responses_level ON responses(level);
+                CREATE INDEX IF NOT EXISTS idx_responses_timestamp ON responses(timestamp);
+            """)
+            
             # Получаем общую статистику
             cur.execute("""
                 SELECT 
@@ -401,14 +405,19 @@ def analytics():
             """)
             overall_stats = cur.fetchall()
 
-            # Получаем статистику по темам
+            # Получаем статистику по интересам из JSON данных
             cur.execute("""
                 SELECT 
-                    topics,
+                    jsonb_array_elements_text(
+                        CASE 
+                            WHEN jsonb_typeof(data->'interests') = 'array' 
+                            THEN data->'interests'
+                            ELSE '[]'::jsonb 
+                        END
+                    ) as topic,
                     COUNT(*) as count
                 FROM responses
-                WHERE topics IS NOT NULL
-                GROUP BY topics
+                GROUP BY topic
                 ORDER BY count DESC
                 LIMIT 10
             """)
@@ -426,6 +435,8 @@ def analytics():
                 LIMIT 10
             """)
             experience_data = cur.fetchall()
+
+            conn.commit()
 
         # Получаем данные анализа категорий
         analysis = analyze_manager.generate_topic_analysis()
