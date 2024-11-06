@@ -16,6 +16,8 @@ from flask_compress import Compress
 import hashlib
 from werkzeug.middleware.proxy_fix import ProxyFix
 from analyze import analyze_manager
+from dotenv import load_dotenv
+load_dotenv()
 
 # Настройка логирования
 logging.basicConfig(
@@ -518,7 +520,24 @@ def ratelimit_handler(e):
     """Rate limit error handler"""
     return jsonify(error="Слишком много запросов. Пожалуйста, подождите немного."), 429
 
+def test_db_connection():
+    """Тестирование подключения к базе данных"""
+    try:
+        conn = get_db_connection()
+        if conn:
+            with conn.cursor() as cur:
+                cur.execute('SELECT version();')
+                version = cur.fetchone()
+                logger.info(f"Database version: {version[0]}")
+            conn.close()
+            return True
+        return False
+    except Exception as e:
+        logger.error(f"Test connection failed: {e}")
+        return False
 
 if __name__ == '__main__':
+    if not test_db_connection():
+        logger.error("Failed to connect to database!")
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
