@@ -471,6 +471,13 @@ def analytics():
         if conn:
             logger.info("Closing database connection")
             conn.close()
+
+
+
+
+
+
+    
     @app.route('/api/topic-analysis')
 def topic_analysis():
     """API endpoint for topic analysis data"""
@@ -480,6 +487,7 @@ def topic_analysis():
     except Exception as e:
         logger.error(f"Error generating topic analysis: {e}")
         return jsonify({'error': 'Failed to generate analysis'}), 500
+
 
 @app.route('/api/public-insights')
 def public_insights():
@@ -494,10 +502,12 @@ def public_insights():
         logger.error(f"Error loading public insights: {e}")
         return jsonify({'error': 'Failed to load insights'}), 500
 
+
 @app.errorhandler(404)
 def not_found_error(error):
     """404 error handler"""
     return render_template('404.html'), 404
+
 
 @app.errorhandler(500)
 def internal_error(error):
@@ -505,10 +515,12 @@ def internal_error(error):
     logger.error(f"Internal server error: {error}")
     return render_template('500.html'), 500
 
+
 @app.errorhandler(429)
 def ratelimit_handler(e):
     """Rate limit error handler"""
     return jsonify(error="Слишком много запросов. Пожалуйста, подождите немного."), 429
+
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
