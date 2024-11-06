@@ -577,6 +577,81 @@ footer a:hover {
     }
 }
 
+/* Стили для страницы аналитики */
+.time-filter {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.filter-btn {
+    padding: 0.5rem 1rem;
+    margin: 0 0.5rem;
+    border: 1px solid var(--primary-color);
+    background: transparent;
+    color: var(--text-color);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: all var(--animation-timing);
+}
+
+.filter-btn.active,
+.filter-btn:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
+.categories-chart {
+    height: 300px;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--border-radius);
+}
+
+/* Обновленные стили для сетки статистики */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.stats-card {
+    background: var(--card-bg);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    box-shadow: var(--card-shadow);
+}
+
+.topics-chart {
+    margin-top: 1rem;
+}
+
+.topic-bar {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.8rem;
+}
+
+.bar {
+    background: var(--primary-color);
+    height: 24px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0 1rem;
+    color: white;
+    margin-right: 1rem;
+    transition: width var(--animation-timing);
+}
+
+.topic-name {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 /* Оптимизация для устройств с предпочтением уменьшенного движения */
 @media (prefers-reduced-motion: reduce) {
     *,
