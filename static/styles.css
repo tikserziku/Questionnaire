@@ -374,13 +374,25 @@ input[type="text"]:focus {
 
 /* Индикатор загрузки */
 #loading-indicator {
-    display: none;
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.8);
     z-index: 2000;
+    display: none;
     justify-content: center;
     align-items: center;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#loading-indicator .spinner {
+    width: 50px;
+    height: 50px;
+}
+
+#loading-indicator span {
+    color: white;
+    font-size: 14px;
 }
 
 .spinner {
