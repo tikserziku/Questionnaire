@@ -6,6 +6,12 @@
 <div class="analytics-container">
     <h1>Аналитика ответов</h1>
 
+    <!-- Фильтр по времени -->
+    <div class="time-filter">
+        <button class="filter-btn active" data-period="all">За все время</button>
+        <button class="filter-btn" data-period="month">За последний месяц</button>
+    </div>
+
     <div class="stats-grid">
         <!-- Общая статистика -->
         <div class="stats-card">
@@ -57,6 +63,81 @@
                 {% endfor %}
             </div>
         </div>
+
+        <!-- Новый раздел: Категории интересов -->
+        <div class="stats-card">
+            <h2>Категории интересов</h2>
+            <div class="categories-chart">
+                <div id="categoriesChart"></div>
+            </div>
+        </div>
     </div>
 </div>
+
+<!-- Добавляем скрипт для отображения графика категорий -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Получаем данные анализа с сервера
+    fetch('/api/topic-analysis')
+        .then(response => response.json())
+        .then(data => {
+            const ctx = document.getElementById('categoriesChart').getContext('2d');
+            const allTimeData = data.all_time;
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Техническое', 'Бизнес', 'Теория'],
+                    datasets: [
+                        {
+                            label: 'Начинающие',
+                            data: [
+                                allTimeData.beginner.technical,
+                                allTimeData.beginner.business,
+                                allTimeData.beginner.theoretical
+                            ],
+                            backgroundColor: 'rgba(54, 162, 235, 0.5)'
+                        },
+                        {
+                            label: 'Продвинутые',
+                            data: [
+                                allTimeData.advanced.technical,
+                                allTimeData.advanced.business,
+                                allTimeData.advanced.theoretical
+                            ],
+                            backgroundColor: 'rgba(255, 99, 132, 0.5)'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Распределение по категориям интересов'
+                        }
+                    }
+                }
+            });
+        })
+        .catch(error => console.error('Error loading analysis:', error));
+
+    // Обработка фильтров времени
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            // Здесь можно добавить логику обновления данных при смене периода
+        });
+    });
+});
+</script>
 {% endblock %}
