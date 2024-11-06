@@ -30,7 +30,7 @@ compress = Compress(app)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 app.secret_key = os.environ.get('SECRET_KEY', os.urandom(24))
 
-# [Оставьте здесь все константы BACKGROUNDS и SURVEY_QUESTIONS как есть]
+# Список доступных фонов (пустой, так как файлы удалены)
 BACKGROUNDS = []
 
 # Конфигурация вопросов
@@ -125,6 +125,7 @@ SURVEY_QUESTIONS = {
         }
     ]
 }
+
 # Проверка переменных окружения
 required_env_vars = [
     'OPENAI_API_KEY',
@@ -148,6 +149,34 @@ limiter = Limiter(
     storage_uri="memory://"
 )
 
+def get_file_hash(filename):
+    """Получение хэша файла для версионирования"""
+    try:
+        hasher = hashlib.md5()
+        with open(filename, 'rb') as f:
+            buf = f.read(65536)
+            while len(buf) > 0:
+                hasher.update(buf)
+                buf = f.read(65536)
+        return hasher.hexdigest()[:8]
+    except Exception as e:
+        logger.error(f"Error generating file hash: {e}")
+        return ""
+
+@lru_cache(maxsize=100)
+def get_versioned_filename(filename):
+    """Получение версионированного имени файла"""
+    try:
+        full_path = os.path.join(app.static_folder, filename)
+        if os.path.exists(full_path):
+            file_hash = get_file_hash(full_path)
+            name, ext = os.path.splitext(filename)
+            return f"{name}.{file_hash}{ext}"
+        return filename
+    except Exception as e:
+        logger.error(f"Error versioning filename: {e}")
+        return filename
+
 def get_db_connection():
     """Создание соединения с базой данных PostgreSQL"""
     try:
@@ -164,19 +193,17 @@ def get_db_connection():
         logger.error(f"Database connection error: {e}")
         return None
 
-# [Оставьте здесь функции get_file_hash и get_versioned_filename как есть]
-
 @app.context_processor
 def utility_processor():
     """Add utility functions to template context"""
     def get_random_background():
-        return random.choice(BACKGROUNDS)
+        if BACKGROUNDS:
+            return random.choice(BACKGROUNDS)
+        return ''
     return {
         'year': datetime.now().year,
         'get_random_background': get_random_background
     }
-
-# [Оставьте здесь все маршруты index, questions, chatgpt, process_voice, thank_you, privacy_policy как есть]
 
 def save_to_db(data):
     """Save form data to database"""
@@ -222,21 +249,123 @@ def save_to_db(data):
         if conn:
             conn.close()
 
-@app.errorhandler(404)
-def not_found_error(error):
-    """404 error handler"""
-    return render_template('404.html'), 404
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    """Main page route"""
+    try:
+        if request.method == 'POST':
+            level = request.form.get('level')
+            if level in ['beginner', 'advanced']:
+                return redirect(url_for('questions', level=level))
+            else:
+                flash('Пожалуйста, выберите уровень', 'error')
+                return redirect(url_for('index'))
+        return render_template('index.html')
+    except Exception as e:
+        logger.error(f"Error on index page: {e}")
+        return "Internal Server Error", 500
 
-@app.errorhandler(500)
-def internal_error(error):
-    """500 error handler"""
-    logger.error(f"Internal server error: {error}")
-    return render_template('500.html'), 500
+@app.route('/questions/<level>', methods=['GET', 'POST'])
+def questions(level):
+    """Survey questions route"""
+    if level not in ['beginner', 'advanced']:
+        flash('Неверный уровень', 'error')
+        return redirect(url_for('index'))
 
-@app.errorhandler(429)
-def ratelimit_handler(e):
-    """Rate limit error handler"""
-    return jsonify(error="Слишком много запросов. Пожалуйста, подождите немного."), 429
+    if request.method == 'POST':
+        try:
+            form_data = request.form.to_dict()
+            form_data['level'] = level
+            form_data['timestamp'] = datetime.utcnow().isoformat()
+            form_data['ip_address'] = request.remote_addr
+            
+            questions = SURVEY_QUESTIONS[level]
+            required_fields = [q['id'] for q in questions if q.get('required')]
+            
+            missing_fields = [field for field in required_fields if not form_data.get(field)]
+            if missing_fields:
+                flash('Пожалуйста, заполните все обязательные поля', 'error')
+                return render_template('questions.html', 
+                                    level=level, 
+                                    questions=questions)
+
+            save_to_db(form_data)
+            return redirect(url_for('thank_you'))
+            
+        except Exception as e:
+            logger.error(f"Error processing form: {e}")
+            flash("Произошла ошибка при сохранении данных. Попробуйте еще раз.", "error")
+            return redirect(url_for('questions', level=level))
+
+    return render_template(
+        'questions.html',
+        level=level,
+        questions=SURVEY_QUESTIONS[level]
+    )
+
+@app.route('/chatgpt', methods=['POST'])
+@limiter.limit("5 per minute")
+def chatgpt():
+    """ChatGPT API endpoint"""
+    if not openai.api_key:
+        return jsonify({'error': 'OpenAI API not configured'}), 503
+
+    try:
+        message = request.json.get('message', '')
+        if not message:
+            return jsonify({'error': 'Empty message'}), 400
+
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant for an AI course survey."},
+                {"role": "user", "content": message}
+            ],
+            max_tokens=150,
+            temperature=0.7
+        )
+        
+        return jsonify({'reply': response.choices[0].message.content})
+    except Exception as e:
+        logger.error(f"ChatGPT API error: {e}")
+        return jsonify({'error': 'Service temporarily unavailable'}), 503
+
+@app.route('/process_voice', methods=['POST'])
+@limiter.limit("5 per minute")
+def process_voice():
+    """Voice processing endpoint"""
+    if not openai.api_key:
+        return jsonify({'error': 'OpenAI API not configured'}), 503
+
+    try:
+        voice_input = request.json.get('voice_input', '')
+        if not voice_input:
+            return jsonify({'error': 'Empty voice input'}), 400
+
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "Ты помощник, который должен ответить на вопрос пользователя. Дай краткий и точный ответ."},
+                {"role": "user", "content": voice_input}
+            ],
+            max_tokens=150,
+            temperature=0.5
+        )
+        
+        return jsonify({'processed_question': response.choices[0].message.content})
+    except Exception as e:
+        logger.error(f"Voice processing error: {e}")
+        return jsonify({'error': 'Service temporarily unavailable'}), 503
+
+@app.route('/thank_you')
+def thank_you():
+    """Thank you page route"""
+    return render_template('thank_you.html')
+
+@app.route('/privacy_policy')
+def privacy_policy():
+    """Privacy policy page route"""
+    return render_template('privacy_policy.html')
 
 @app.route('/analytics')
 def analytics():
@@ -348,22 +477,22 @@ def public_insights():
     except Exception as e:
         logger.error(f"Error loading public insights: {e}")
         return jsonify({'error': 'Failed to load insights'}), 500
-        
-@app.route('/', methods=['GET', 'POST'])
-def index():
-    """Main page route"""
-    try:
-        if request.method == 'POST':
-            level = request.form.get('level')
-            if level in ['beginner', 'advanced']:
-                return redirect(url_for('questions', level=level))
-            else:
-                flash('Пожалуйста, выберите уровень', 'error')
-                return redirect(url_for('index'))
-        return render_template('index.html')
-    except Exception as e:
-        logger.error(f"Error on index page: {e}")
-        return "Internal Server Error", 500
+
+@app.errorhandler(404)
+def not_found_error(error):
+    """404 error handler"""
+    return render_template('404.html'), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    """500 error handler"""
+    logger.error(f"Internal server error: {error}")
+    return render_template('500.html'), 500
+
+@app.errorhandler(429)
+def ratelimit_handler(e):
+    """Rate limit error handler"""
+    return jsonify(error="Слишком много запросов. Пожалуйста, подождите немного."), 429
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
