@@ -456,6 +456,14 @@ input[type="text"]:focus {
     max-width: 800px;
     margin: 0 auto;
     padding: 2rem;
+    text-align: center;
+}
+
+.welcome-container h1 {
+    font-size: 2.5rem;
+    margin-bottom: 3rem;
+    color: var(--text-color);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .survey-form,
@@ -463,28 +471,35 @@ input[type="text"]:focus {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 2rem;
+    padding: 2.5rem 2rem;
     background: var(--card-bg);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 1rem;
     color: var(--text-color);
     cursor: pointer;
-    transition: transform 0.3s ease;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    text-align: center;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.card-icon {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
 }
 
 .level-card h2 {
-    margin: 1rem 0;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
     color: var(--text-color);
     font-weight: 600;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .level-card p {
-    text-align: center;
-    color: rgba(255, 255, 255, 0.9);
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.8);
+    max-width: 240px;
+    margin: 0 auto;
 }
 /* Футер */
 footer {
@@ -514,23 +529,24 @@ footer a:hover {
 
 /* Адаптивность */
 @media (max-width: 768px) {
-    body::after {
-        width: 300px;
-        height: 300px;
-    }
-    
-    body::before {
-        animation: none;
-    }
-    
-    .container,
-    .modal-content,
-    .survey-container,
     .welcome-container {
-        padding: 1rem;
+        padding: 1.5rem;
     }
-    
-    .level-cards,
+
+    .welcome-container h1 {
+        font-size: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .level-cards {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .level-card {
+        padding: 2rem 1.5rem;
+    }
+}
     .input-assistance {
     display: flex;
     gap: 1rem;
