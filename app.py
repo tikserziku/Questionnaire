@@ -379,6 +379,41 @@ def ratelimit_handler(e):
     """Rate limit error handler"""
     return jsonify(error="Слишком много запросов. Пожалуйста, подождите немного."), 429
 
+@app.route('/analytics')
+def analytics():
+    """Analytics dashboard route"""
+    try:
+        # Получаем данные для аналитики
+        analysis = analyze_manager.generate_topic_analysis()
+        return render_template('analytics.html', analysis=analysis)
+    except Exception as e:
+        logger.error(f"Error loading analytics: {e}")
+        flash("Ошибка при загрузке аналитики", "error")
+        return redirect(url_for('index'))
+
+@app.route('/api/topic-analysis')
+def topic_analysis():
+    """API endpoint for topic analysis data"""
+    try:
+        analysis = analyze_manager.generate_topic_analysis()
+        return jsonify(analysis)
+    except Exception as e:
+        logger.error(f"Error generating topic analysis: {e}")
+        return jsonify({'error': 'Failed to generate analysis'}), 500
+
+@app.route('/api/public-insights')
+def public_insights():
+    """Public insights page"""
+    try:
+        analysis = analyze_manager.generate_topic_analysis()
+        categorized_responses = analyze_manager.get_categorized_responses()
+        return render_template('public_insights.html', 
+                             analysis=analysis,
+                             responses=categorized_responses)
+    except Exception as e:
+        logger.error(f"Error loading public insights: {e}")
+        return jsonify({'error': 'Failed to load insights'}), 500
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
