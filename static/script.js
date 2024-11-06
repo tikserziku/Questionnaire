@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
             voiceIndicator.classList.add('recording');
             voiceStatusText.textContent = 'Слушаю...';
             startVoiceBtn.disabled = true;
-            loadingIndicator.style.display = 'block';
+            loadingIndicator.classList.add('active');
         };
 
         startVoiceBtn.addEventListener('click', () => {
@@ -133,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
         recognition.onend = () => {
             voiceIndicator.classList.remove('recording');
             startVoiceBtn.disabled = false;
-            loadingIndicator.style.display = 'none';
+            loadingIndicator.classList.remove('active');
         };
 
         // Обработчик кнопки использования результата
