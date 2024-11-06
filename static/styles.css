@@ -531,7 +531,13 @@ footer a:hover {
     }
     
     .level-cards,
-    .input-assistance,
+    .input-assistance {
+    display: flex;
+    gap: 1rem;
+    margin: 2rem 0;
+    justify-content: center; /* Добавляем центрирование */
+    flex-direction: row; /* Явно указываем горизонтальное расположение */
+}
     .footer-content {
         grid-template-columns: 1fr;
         flex-direction: column;
@@ -544,6 +550,14 @@ footer a:hover {
 
     .thank-you-container h2 {
         font-size: 2rem;
+    }
+}
+
+/* Для мобильных устройств можно оставить вертикальное расположение */
+@media (max-width: 768px) {
+    .input-assistance {
+        flex-direction: column;
+        align-items: center;
     }
 }
 
