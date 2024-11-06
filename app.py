@@ -380,13 +380,21 @@ def ratelimit_handler(e):
 @app.route('/analytics')
 def analytics():
     """Analytics dashboard route"""
+    logger.info("Starting analytics page load")
+    conn = None
     try:
+        # Логируем попытку подключения к БД
+        logger.info("Attempting database connection")
         conn = get_db_connection()
         if not conn:
+            logger.error("Database connection failed - get_db_connection returned None")
             flash("Ошибка подключения к базе данных", "error")
             return redirect(url_for('index'))
 
+        logger.info("Database connection successful")
+        
         with conn.cursor() as cur:
+            logger.info("Executing overall stats query")
             # Создаем необходимые индексы, если их нет
             cur.execute("""
                 CREATE INDEX IF NOT EXISTS idx_responses_level ON responses(level);
@@ -404,7 +412,9 @@ def analytics():
                 GROUP BY level
             """)
             overall_stats = cur.fetchall()
+            logger.info(f"Retrieved overall stats: {overall_stats}")
 
+            logger.info("Executing topic stats query")
             # Получаем статистику по интересам из JSON данных
             cur.execute("""
                 SELECT 
@@ -422,7 +432,9 @@ def analytics():
                 LIMIT 10
             """)
             topic_stats = dict(cur.fetchall())
+            logger.info(f"Retrieved topic stats: {topic_stats}")
 
+            logger.info("Executing experience data query")
             # Получаем данные об опыте
             cur.execute("""
                 SELECT 
@@ -435,12 +447,16 @@ def analytics():
                 LIMIT 10
             """)
             experience_data = cur.fetchall()
+            logger.info(f"Retrieved experience data: {experience_data}")
 
             conn.commit()
 
         # Получаем данные анализа категорий
+        logger.info("Generating topic analysis")
         analysis = analyze_manager.generate_topic_analysis()
+        logger.info("Topic analysis generated successfully")
 
+        logger.info("Rendering analytics template")
         return render_template('analytics.html',
                              overall_stats=overall_stats,
                              topic_stats=topic_stats,
@@ -448,12 +464,13 @@ def analytics():
                              analysis=analysis)
 
     except Exception as e:
-        logger.error(f"Error loading analytics: {e}")
+        logger.error(f"Error loading analytics: {str(e)}", exc_info=True)
         flash("Ошибка при загрузке аналитики", "error")
         return redirect(url_for('index'))
 
     finally:
         if conn:
+            logger.info("Closing database connection")
             conn.close()
 
 @app.route('/api/topic-analysis')
