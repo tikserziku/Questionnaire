@@ -399,9 +399,20 @@ def analytics():
         logger.info("Attempting database connection")
         conn = get_db_connection()
         if not conn:
-            logger.error("Database connection failed")
-            flash("Ошибка подключения к базе данных", "error")
+            logger.error("Database connection failed in analytics route")
+            flash("Ошибка подключения к базе данных. Проверьте конфигурацию.", "error")
             return redirect(url_for('index'))
+
+        # Дальнейший код остается тем же
+       
+    except Exception as e:
+        logger.error(f"Error in analytics route: {str(e)}", exc_info=True)
+        flash("Ошибка при загрузке аналитики. Подробности в логах.", "error")
+        return redirect(url_for('index'))
+    finally:
+        if conn:
+            logger.info("Closing database connection")
+            conn.close()
 
         with conn.cursor() as cur:
             # Создаем индексы
