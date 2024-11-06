@@ -1,4 +1,5 @@
 import os
+import psycopg2
 import sys
 import logging
 import json
@@ -184,34 +185,12 @@ def get_versioned_filename(filename):
 def get_db_connection():
     """Создание соединения с базой данных PostgreSQL"""
     try:
-        connection_params = {
-            'dbname': 'postgresql',
-            'user': 'postgresql',
-            'host': os.environ.get('STACKHERO_POSTGRESQL_HOST'),
-            'port': os.environ.get('STACKHERO_POSTGRESQL_PORT'),
-            'password': os.environ.get('STACKHERO_POSTGRESQL_ADMIN_PASSWORD')
-        }
-        logger.info(f"Attempting DB connection with host: {connection_params['host']}, port: {connection_params['port']}")
-
-        conn = psycopg2.connect(
-            dbname=connection_params['dbname'],
-            user=connection_params['user'],
-            password=connection_params['password'],
-            host=connection_params['host'],
-            port=connection_params['port'],
-            connect_timeout=5,
-            sslmode='require'
-        )
+        database_url = os.environ['DATABASE_URL']
+        conn = psycopg2.connect(database_url, sslmode='require')
         logger.info("Database connection successful")
         return conn
-    except psycopg2.OperationalError as e:
-        logger.error(f"Database operational error: {str(e)}")
-        return None
-    except psycopg2.Error as e:
+    except psycopg2.Error as e:  # <--  Обработка всех ошибок psycopg2 здесь
         logger.error(f"Database error: {str(e)}")
-        return None
-    except Exception as e:
-        logger.error(f"Unexpected error during database connection: {str(e)}")
         return None
 
 
