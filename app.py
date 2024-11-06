@@ -129,9 +129,10 @@ SURVEY_QUESTIONS = {
 # Проверка переменных окружения
 required_env_vars = [
     'OPENAI_API_KEY',
-    'STACKHERO_POSTGRESQL_ADMIN_PASSWORD',
+    'KEY',  # Изменено с STACKHERO_POSTGRESQL_ADMIN_PASSWORD
     'STACKHERO_POSTGRESQL_HOST',
-    'STACKHERO_POSTGRESQL_PORT'
+    'STACKHERO_POSTGRESQL_PORT',
+    'SECRET_KEY'
 ]
 
 missing_vars = [var for var in required_env_vars if not os.getenv(var)]
@@ -183,7 +184,7 @@ def get_db_connection():
         conn = psycopg2.connect(
             dbname='postgres',
             user='postgres',
-            password=os.environ['STACKHERO_POSTGRESQL_ADMIN_PASSWORD'],
+            password=os.environ['KEY'],  # Изменено с STACKHERO_POSTGRESQL_ADMIN_PASSWORD
             host=os.environ['STACKHERO_POSTGRESQL_HOST'],
             port=os.environ['STACKHERO_POSTGRESQL_PORT'],
             connect_timeout=5
