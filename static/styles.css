@@ -423,6 +423,10 @@ input[type="text"]:focus {
     gap: 10px;
 }
 
+#loading-indicator.active {
+    display: flex; /* Важно использовать flex вместо block при активации */
+}
+
 #loading-indicator .spinner {
     width: 50px;
     height: 50px;
@@ -440,6 +444,10 @@ input[type="text"]:focus {
     border-top-color: var(--primary-color);
     border-radius: 50%;
     animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }
 
 /* Контейнеры и карточки */
