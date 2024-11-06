@@ -283,44 +283,65 @@ def index():
 
 @app.route('/questions/<level>', methods=['GET', 'POST'])
 def questions(level):
+    """Survey questions route"""
     if level not in ['beginner', 'advanced']:
+        logger.error(f"Invalid level requested: {level}")
         flash('Неверный уровень', 'error')
         return redirect(url_for('index'))
 
     if request.method == 'POST':
         try:
-            form_data = request.form.to_dict()
-            # Добавляем отладочный вывод
-            logger.info(f"Received form data: {form_data}")
+            # Логируем все полученные данные
+            logger.info(f"Form data received: {request.form}")
             
+            form_data = request.form.to_dict()
             form_data['level'] = level
             form_data['timestamp'] = datetime.utcnow().isoformat()
             form_data['ip_address'] = request.remote_addr
 
+            # Получаем список обязательных полей
             questions = SURVEY_QUESTIONS[level]
             required_fields = [q['id'] for q in questions if q.get('required')]
-            
-            # Добавляем отладочный вывод
-            logger.info(f"Required fields: {required_fields}")
-            logger.info(f"Received fields: {form_data.keys()}")
-            
+            logger.info(f"Required fields for {level}: {required_fields}")
+            logger.info(f"Received fields: {list(form_data.keys())}")
+
+            # Проверяем наличие checkbox полей
+            checkbox_fields = []
+            if level == 'advanced':
+                checkbox_fields = ['tools', 'interests']
+            else:
+                checkbox_fields = ['learning_style', 'interests']
+
+            # Обработка множественных значений для checkbox
+            for field in checkbox_fields:
+                if field in request.form.getlist(field):
+                    form_data[field] = request.form.getlist(field)
+                else:
+                    form_data[field] = []
+                logger.info(f"Checkbox field {field}: {form_data[field]}")
+
+            # Проверяем обязательные поля
             missing_fields = [field for field in required_fields if not form_data.get(field)]
             if missing_fields:
-                # Добавляем отладочный вывод
-                logger.error(f"Missing fields: {missing_fields}")
-                flash(f'Пожалуйста, заполните обязательные поля: {", ".join(missing_fields)}', 'error')
+                logger.error(f"Missing required fields: {missing_fields}")
+                flash(f'Пожалуйста, заполните следующие поля: {", ".join(missing_fields)}', 'error')
                 return render_template('questions.html',
                                     level=level,
                                     questions=questions)
 
+            # Сохраняем данные
+            logger.info("Attempting to save form data to database")
             save_to_db(form_data)
+            logger.info("Data saved successfully")
+            
             return redirect(url_for('thank_you'))
 
         except Exception as e:
-            logger.error(f"Error processing form: {e}")
+            logger.error(f"Error processing form: {str(e)}", exc_info=True)
             flash("Произошла ошибка при сохранении данных. Попробуйте еще раз.", "error")
             return redirect(url_for('questions', level=level))
 
+    # GET request
     return render_template(
         'questions.html',
         level=level,
