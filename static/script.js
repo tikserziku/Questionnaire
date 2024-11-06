@@ -193,7 +193,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             isProcessing = true;
-            loadingIndicator.style.display = 'block';
+            function showLoader() {
+    document.getElementById('loading-indicator').classList.add('active');
+}
+
+function hideLoader() {
+    document.getElementById('loading-indicator').classList.remove('active');
+}
             
             chatInput.value = '';
             appendMessage(message, true);
