@@ -270,6 +270,44 @@ input[type="text"]:focus {
     scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
 }
 
+/* Стили для кнопки отправки в чате */
+#chatgpt-modal input[type="submit"],
+#chatgpt-send {
+    background-color: #4CAF50;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+#chatgpt-modal input[type="submit"]:hover,
+#chatgpt-send:hover {
+    background-color: #45a049;
+}
+
+/* Стили для поля ввода в чате */
+#chatgpt-modal input[type="text"],
+#chatgpt-input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    margin-right: 8px;
+}
+
+/* Контейнер для поля ввода и кнопки */
+.chat-input-container {
+    display: flex;
+    gap: 8px;
+    padding: 8px;
+    align-items: center;
+}
+
 .user-message,
 .bot-message {
     max-width: 85%;
