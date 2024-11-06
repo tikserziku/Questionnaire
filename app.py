@@ -125,11 +125,10 @@ SURVEY_QUESTIONS = {
         }
     ]
 }
-
 # Проверка переменных окружения
 required_env_vars = [
     'OPENAI_API_KEY',
-    'KEY',  # Изменено с STACKHERO_POSTGRESQL_ADMIN_PASSWORD
+    'STACKHERO_POSTGRESQL_ADMIN_PASSWORD',
     'STACKHERO_POSTGRESQL_HOST',
     'STACKHERO_POSTGRESQL_PORT',
     'SECRET_KEY'
@@ -394,20 +393,9 @@ def analytics():
         logger.info("Attempting database connection")
         conn = get_db_connection()
         if not conn:
-            logger.error("Database connection failed in analytics route")
-            flash("Ошибка подключения к базе данных. Проверьте конфигурацию.", "error")
+            logger.error("Database connection failed")
+            flash("Ошибка подключения к базе данных", "error")
             return redirect(url_for('index'))
-
-        # Дальнейший код остается тем же
-       
-    except Exception as e:
-        logger.error(f"Error in analytics route: {str(e)}", exc_info=True)
-        flash("Ошибка при загрузке аналитики. Подробности в логах.", "error")
-        return redirect(url_for('index'))
-    finally:
-        if conn:
-            logger.info("Closing database connection")
-            conn.close()
 
         with conn.cursor() as cur:
             # Создаем индексы
@@ -483,8 +471,7 @@ def analytics():
         if conn:
             logger.info("Closing database connection")
             conn.close()
-
-@app.route('/api/topic-analysis')
+    @app.route('/api/topic-analysis')
 def topic_analysis():
     """API endpoint for topic analysis data"""
     try:
