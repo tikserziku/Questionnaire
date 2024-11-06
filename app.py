@@ -31,7 +31,100 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 app.secret_key = os.environ.get('SECRET_KEY', os.urandom(24))
 
 # [Оставьте здесь все константы BACKGROUNDS и SURVEY_QUESTIONS как есть]
+BACKGROUNDS = []
 
+# Конфигурация вопросов
+SURVEY_QUESTIONS = {
+    'beginner': [
+        {
+            "id": "expectations",
+            "text": "Что вы ожидаете получить от курса по ИИ?",
+            "type": "textarea",
+            "placeholder": "Опишите ваши цели и ожидания...",
+            "required": True
+        },
+        {
+            "id": "experience",
+            "text": "Есть ли у вас опыт программирования? На каком языке?",
+            "type": "textarea",
+            "placeholder": "Расскажите о вашем опыте...",
+            "required": True
+        },
+        {
+            "id": "learning_style",
+            "text": "Как вы предпочитаете учиться?",
+            "type": "checkbox",
+            "options": [
+                "Практические задания",
+                "Теоретические материалы",
+                "Видео-уроки",
+                "Работа в группе",
+                "Индивидуальные консультации"
+            ],
+            "required": True
+        },
+        {
+            "id": "interests",
+            "text": "Какие области ИИ вас интересуют больше всего?",
+            "type": "checkbox",
+            "options": [
+                "Машинное обучение",
+                "Нейронные сети",
+                "Обработка естественного языка",
+                "Компьютерное зрение",
+                "Чат-боты",
+                "Автоматизация процессов"
+            ],
+            "required": True
+        }
+    ],
+    'advanced': [
+        {
+            "id": "ai_experience",
+            "text": "Опишите ваш опыт работы с ИИ",
+            "type": "textarea",
+            "placeholder": "Проекты, технологии, фреймворки...",
+            "required": True
+        },
+        {
+            "id": "challenges",
+            "text": "С какими сложностями вы сталкивались при работе с ИИ?",
+            "type": "textarea",
+            "placeholder": "Опишите проблемы и как вы их решали...",
+            "required": True
+        },
+        {
+            "id": "tools",
+            "text": "Какие инструменты ИИ вы использовали?",
+            "type": "checkbox",
+            "options": [
+                "TensorFlow",
+                "PyTorch",
+                "Scikit-learn",
+                "OpenAI API",
+                "Hugging Face",
+                "Keras",
+                "Другое (укажите в комментарии)"
+            ],
+            "required": True
+        },
+        {
+            "id": "interests",
+            "text": "Какие продвинутые темы вас интересуют?",
+            "type": "checkbox",
+            "options": [
+                "Глубокое обучение",
+                "Трансформеры",
+                "Reinforcement Learning",
+                "GANs",
+                "MLOps",
+                "Оптимизация моделей",
+                "Другое (укажите в комментарии)"
+            ],
+            "required": True
+        }
+    ]
+}
 # Проверка переменных окружения
 required_env_vars = [
     'OPENAI_API_KEY',
