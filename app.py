@@ -136,9 +136,11 @@ required_env_vars = [
     'SECRET_KEY'
 ]
 
+# Проверяем, что все переменные установлены
 missing_vars = [var for var in required_env_vars if not os.getenv(var)]
 if missing_vars:
-    logger.warning(f"Missing environment variables: {', '.join(missing_vars)}")
+    logger.error(f"Missing required environment variables: {', '.join(missing_vars)}")
+    # Можно даже добавить raise Exception, чтобы приложение не запускалось без настроек
 
 openai.api_key = os.getenv('OPENAI_API_KEY')
 if not openai.api_key:
@@ -183,13 +185,16 @@ def get_versioned_filename(filename):
 
 
 def get_db_connection():
+    def get_db_connection():
     """Создание соединения с базой данных PostgreSQL"""
     try:
-        database_url = os.environ['DATABASE_URL']
-        conn = psycopg2.connect(database_url, sslmode='require')
+        # Формируем URL подключения из переменных окружения
+        database_url = f"postgresql://admin:{os.getenv('STACKHERO_POSTGRESQL_ADMIN_PASSWORD')}@{os.getenv('STACKHERO_POSTGRESQL_HOST')}:{os.getenv('STACKHERO_POSTGRESQL_PORT')}/admin?sslmode=require"
+        
+        conn = psycopg2.connect(database_url)
         logger.info("Database connection successful")
         return conn
-    except psycopg2.Error as e:  # <--  Обработка всех ошибок psycopg2 здесь
+    except psycopg2.Error as e:
         logger.error(f"Database error: {str(e)}")
         return None
 
