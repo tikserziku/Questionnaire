@@ -185,11 +185,15 @@ def get_versioned_filename(filename):
 
 
 def get_db_connection():
-    def get_db_connection():
     """Создание соединения с базой данных PostgreSQL"""
     try:
-        # Формируем URL подключения из переменных окружения
-        database_url = f"postgresql://admin:{os.getenv('STACKHERO_POSTGRESQL_ADMIN_PASSWORD')}@{os.getenv('STACKHERO_POSTGRESQL_HOST')}:{os.getenv('STACKHERO_POSTGRESQL_PORT')}/admin?sslmode=require"
+        database_url = os.environ.get('DATABASE_URL')
+        if database_url and database_url.startswith('postgres://'):
+            database_url = database_url.replace('postgres://', 'postgresql://', 1)
+            
+        if not database_url:
+            # Формируем URL из отдельных переменных
+            database_url = f"postgresql://admin:{os.getenv('STACKHERO_POSTGRESQL_ADMIN_PASSWORD')}@{os.getenv('STACKHERO_POSTGRESQL_HOST')}:{os.getenv('STACKHERO_POSTGRESQL_PORT')}/admin?sslmode=require"
         
         conn = psycopg2.connect(database_url)
         logger.info("Database connection successful")
