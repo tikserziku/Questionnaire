@@ -196,7 +196,59 @@ document.addEventListener('DOMContentLoaded', () => {
             function showLoader() {
     document.getElementById('loading-indicator').classList.add('active');
 }
+// Сначала объявим функции вне handleChatSubmit
+function showLoader() {
+    document.getElementById('loading-indicator').classList.add('active');
+}
 
+function hideLoader() {
+    document.getElementById('loading-indicator').classList.remove('active');
+}
+
+const handleChatSubmit = async () => {
+    if (isProcessing) return;
+    
+    const message = chatInput.value.trim();
+    if (!message) return;
+
+    try {
+        isProcessing = true;
+        showLoader(); // Показываем индикатор загрузки
+        
+        chatInput.value = '';
+        appendMessage(message, true);
+        
+        const response = await fetch('/chatgpt', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ message })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || 'Network response was not ok');
+        }
+
+        const data = await response.json();
+        appendMessage(data.reply);
+
+        const currentDialogs = chatgptQuestionsInput.value;
+        const newDialog = `Q: ${message}\nA: ${data.reply}\n---\n`;
+        chatgptQuestionsInput.value = currentDialogs + newDialog;
+
+    } catch (error) {
+        console.error('ChatGPT error:', error);
+        appendMessage('Произошла ошибка. Попробуйте еще раз.', false);
+    } finally {
+        isProcessing = false;
+        hideLoader(); // Скрываем индикатор загрузки
+        chatInput.focus();
+    }
+};
+
+            
 function hideLoader() {
     document.getElementById('loading-indicator').classList.remove('active');
 }
