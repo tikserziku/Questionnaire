@@ -283,7 +283,6 @@ def index():
 
 @app.route('/questions/<level>', methods=['GET', 'POST'])
 def questions(level):
-    """Survey questions route"""
     if level not in ['beginner', 'advanced']:
         flash('Неверный уровень', 'error')
         return redirect(url_for('index'))
@@ -291,19 +290,28 @@ def questions(level):
     if request.method == 'POST':
         try:
             form_data = request.form.to_dict()
+            # Добавляем отладочный вывод
+            logger.info(f"Received form data: {form_data}")
+            
             form_data['level'] = level
             form_data['timestamp'] = datetime.utcnow().isoformat()
             form_data['ip_address'] = request.remote_addr
 
             questions = SURVEY_QUESTIONS[level]
             required_fields = [q['id'] for q in questions if q.get('required')]
-
+            
+            # Добавляем отладочный вывод
+            logger.info(f"Required fields: {required_fields}")
+            logger.info(f"Received fields: {form_data.keys()}")
+            
             missing_fields = [field for field in required_fields if not form_data.get(field)]
             if missing_fields:
-                flash('Пожалуйста, заполните все обязательные поля', 'error')
+                # Добавляем отладочный вывод
+                logger.error(f"Missing fields: {missing_fields}")
+                flash(f'Пожалуйста, заполните обязательные поля: {", ".join(missing_fields)}', 'error')
                 return render_template('questions.html',
-                                       level=level,
-                                       questions=questions)
+                                    level=level,
+                                    questions=questions)
 
             save_to_db(form_data)
             return redirect(url_for('thank_you'))
