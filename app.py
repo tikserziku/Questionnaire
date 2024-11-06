@@ -348,6 +348,22 @@ def public_insights():
     except Exception as e:
         logger.error(f"Error loading public insights: {e}")
         return jsonify({'error': 'Failed to load insights'}), 500
+        
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    """Main page route"""
+    try:
+        if request.method == 'POST':
+            level = request.form.get('level')
+            if level in ['beginner', 'advanced']:
+                return redirect(url_for('questions', level=level))
+            else:
+                flash('Пожалуйста, выберите уровень', 'error')
+                return redirect(url_for('index'))
+        return render_template('index.html')
+    except Exception as e:
+        logger.error(f"Error on index page: {e}")
+        return "Internal Server Error", 500
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
