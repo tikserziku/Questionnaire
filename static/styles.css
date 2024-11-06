@@ -652,6 +652,80 @@ footer a:hover {
     text-overflow: ellipsis;
 }
 
+/* Навигационное меню */
+.main-nav {
+    background: var(--bg-dark);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 1rem 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+}
+
+.nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-logo {
+    color: var(--text-color);
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-decoration: none;
+    transition: color var(--animation-timing);
+}
+
+.nav-logo:hover {
+    color: var(--primary-color);
+}
+
+.nav-links {
+    display: flex;
+    gap: 2rem;
+}
+
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius);
+    transition: all var(--animation-timing);
+}
+
+.nav-link:hover {
+    background: var(--hover-bg);
+    color: var(--primary-color);
+}
+
+/* Адаптивное меню */
+@media (max-width: 768px) {
+    .nav-container {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .nav-links {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .nav-link {
+        display: block;
+        padding: 0.8rem;
+    }
+}
+
+/* Регулируем отступ основного контента */
+#main-content {
+    padding-top: 2rem;
+}
+
 /* Оптимизация для устройств с предпочтением уменьшенного движения */
 @media (prefers-reduced-motion: reduce) {
     *,
