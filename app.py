@@ -125,6 +125,7 @@ SURVEY_QUESTIONS = {
         }
     ]
 }
+
 # Проверка переменных окружения
 required_env_vars = [
     'OPENAI_API_KEY',
@@ -149,6 +150,7 @@ limiter = Limiter(
     storage_uri="memory://"
 )
 
+
 def get_file_hash(filename):
     """Получение хэша файла для версионирования"""
     try:
@@ -162,6 +164,7 @@ def get_file_hash(filename):
     except Exception as e:
         logger.error(f"Error generating file hash: {e}")
         return ""
+
 
 @lru_cache(maxsize=100)
 def get_versioned_filename(filename):
@@ -177,6 +180,7 @@ def get_versioned_filename(filename):
         logger.error(f"Error versioning filename: {e}")
         return filename
 
+
 def get_db_connection():
     """Создание соединения с базой данных PostgreSQL"""
     try:
@@ -188,7 +192,7 @@ def get_db_connection():
             'password': os.environ.get('STACKHERO_POSTGRESQL_ADMIN_PASSWORD')
         }
         logger.info(f"Attempting DB connection with host: {connection_params['host']}, port: {connection_params['port']}")
-        
+
         conn = psycopg2.connect(
             dbname=connection_params['dbname'],
             user=connection_params['user'],
@@ -210,6 +214,7 @@ def get_db_connection():
         logger.error(f"Unexpected error during database connection: {str(e)}")
         return None
 
+
 @app.context_processor
 def utility_processor():
     """Add utility functions to template context"""
@@ -217,10 +222,12 @@ def utility_processor():
         if BACKGROUNDS:
             return random.choice(BACKGROUNDS)
         return ''
+
     return {
         'year': datetime.now().year,
         'get_random_background': get_random_background
     }
+
 
 def save_to_db(data):
     """Save form data to database"""
@@ -242,7 +249,7 @@ def save_to_db(data):
                     ip_address TEXT
                 )
             ''')
-            
+
             cur.execute(
                 'INSERT INTO responses (level, data, voice_question, chatgpt_questions, timestamp, ip_address) '
                 'VALUES (%s, %s::jsonb, %s, %s, %s, %s)',
@@ -265,7 +272,9 @@ def save_to_db(data):
     finally:
         if conn:
             conn.close()
-    @app.route('/', methods=['GET', 'POST'])
+
+
+@app.route('/', methods=['GET', 'POST'])
 def index():
     """Main page route"""
     try:
@@ -281,6 +290,7 @@ def index():
         logger.error(f"Error on index page: {e}")
         return "Internal Server Error", 500
 
+
 @app.route('/questions/<level>', methods=['GET', 'POST'])
 def questions(level):
     """Survey questions route"""
@@ -294,20 +304,20 @@ def questions(level):
             form_data['level'] = level
             form_data['timestamp'] = datetime.utcnow().isoformat()
             form_data['ip_address'] = request.remote_addr
-            
+
             questions = SURVEY_QUESTIONS[level]
             required_fields = [q['id'] for q in questions if q.get('required')]
-            
+
             missing_fields = [field for field in required_fields if not form_data.get(field)]
             if missing_fields:
                 flash('Пожалуйста, заполните все обязательные поля', 'error')
-                return render_template('questions.html', 
-                                    level=level, 
-                                    questions=questions)
+                return render_template('questions.html',
+                                       level=level,
+                                       questions=questions)
 
             save_to_db(form_data)
             return redirect(url_for('thank_you'))
-            
+
         except Exception as e:
             logger.error(f"Error processing form: {e}")
             flash("Произошла ошибка при сохранении данных. Попробуйте еще раз.", "error")
@@ -318,6 +328,7 @@ def questions(level):
         level=level,
         questions=SURVEY_QUESTIONS[level]
     )
+
 
 @app.route('/chatgpt', methods=['POST'])
 @limiter.limit("5 per minute")
@@ -340,11 +351,12 @@ def chatgpt():
             max_tokens=150,
             temperature=0.7
         )
-        
+
         return jsonify({'reply': response.choices[0].message.content})
     except Exception as e:
         logger.error(f"ChatGPT API error: {e}")
         return jsonify({'error': 'Service temporarily unavailable'}), 503
+
 
 @app.route('/process_voice', methods=['POST'])
 @limiter.limit("5 per minute")
@@ -367,21 +379,24 @@ def process_voice():
             max_tokens=150,
             temperature=0.5
         )
-        
+
         return jsonify({'processed_question': response.choices[0].message.content})
     except Exception as e:
         logger.error(f"Voice processing error: {e}")
         return jsonify({'error': 'Service temporarily unavailable'}), 503
+
 
 @app.route('/thank_you')
 def thank_you():
     """Thank you page route"""
     return render_template('thank_you.html')
 
+
 @app.route('/privacy_policy')
 def privacy_policy():
     """Privacy policy page route"""
     return render_template('privacy_policy.html')
+
 
 @app.route('/analytics')
 def analytics():
@@ -402,7 +417,7 @@ def analytics():
                 CREATE INDEX IF NOT EXISTS idx_responses_level ON responses(level);
                 CREATE INDEX IF NOT EXISTS idx_responses_timestamp ON responses(timestamp);
             """)
-            
+
             # Общая статистика
             cur.execute("""
                 SELECT 
@@ -456,10 +471,10 @@ def analytics():
         logger.info("Topic analysis generated")
 
         return render_template('analytics.html',
-                             overall_stats=overall_stats,
-                             topic_stats=topic_stats,
-                             experience_data=experience_data,
-                             analysis=analysis)
+                               overall_stats=overall_stats,
+                               topic_stats=topic_stats,
+                               experience_data=experience_data,
+                               analysis=analysis)
 
     except Exception as e:
         logger.error(f"Error loading analytics: {str(e)}", exc_info=True)
@@ -472,7 +487,7 @@ def analytics():
             conn.close()
 
 
-  @app.route('/api/topic-analysis')
+@app.route('/api/topic-analysis')
 def topic_analysis():
     """API endpoint for topic analysis data"""
     try:
@@ -482,23 +497,26 @@ def topic_analysis():
         logger.error(f"Error generating topic analysis: {e}")
         return jsonify({'error': 'Failed to generate analysis'}), 500
 
+
 @app.route('/api/public-insights')
 def public_insights():
     """Public insights page"""
     try:
         analysis = analyze_manager.generate_topic_analysis()
         categorized_responses = analyze_manager.get_categorized_responses()
-        return render_template('public_insights.html', 
-                             analysis=analysis,
-                             responses=categorized_responses)
+        return render_template('public_insights.html',
+                               analysis=analysis,
+                               responses=categorized_responses)
     except Exception as e:
         logger.error(f"Error loading public insights: {e}")
         return jsonify({'error': 'Failed to load insights'}), 500
+
 
 @app.errorhandler(404)
 def not_found_error(error):
     """404 error handler"""
     return render_template('404.html'), 404
+
 
 @app.errorhandler(500)
 def internal_error(error):
@@ -506,10 +524,12 @@ def internal_error(error):
     logger.error(f"Internal server error: {error}")
     return render_template('500.html'), 500
 
+
 @app.errorhandler(429)
 def ratelimit_handler(e):
     """Rate limit error handler"""
     return jsonify(error="Слишком много запросов. Пожалуйста, подождите немного."), 429
+
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
