@@ -10,7 +10,14 @@ import openai
 import psycopg2
 from datetime import datetime
 from whitenoise import WhiteNoise
-
+# Добавляем новые импорты
+from functools import lru_cache
+from flask_compress import Compress
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+import hashlib
+from werkzeug.middleware.proxy_fix import ProxyFix
+from datetime import datetime, timedelta
 # Настройка логирования
 logging.basicConfig(
     stream=sys.stdout,
@@ -150,6 +157,23 @@ limiter = Limiter(
     default_limits=["100 per hour"],
     storage_uri="memory://"
 )
+
+# Настройка кэширования
+def get_file_hash(filename):
+    """Получение хэша файла для версионирования"""
+    hasher = hashlib.md5()
+    with open(filename, 'rb') as f:
+        buf = f.read(65536)
+        while len(buf) > 0:
+            hasher.update(buf)
+            buf = f.read(65536)
+    return hasher.hexdigest()[:8]
+
+# Кэширование версий статических файлов
+@lru_cache(maxsize=100)
+def get_versioned_filename(filename):
+    """Получение версионированного имени файла"""
+    file_hash
 
 def get_db_connection():
     """Create database connection with error handling"""
